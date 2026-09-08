@@ -57,7 +57,7 @@ const SecuritySettings = () => {
   return (
     <main className="min-h-full w-full bg-[#101211] p-3 font-sans text-zinc-200 sm:p-5 lg:p-8">
       <div className="mx-auto min-h-full w-full max-w-7xl rounded-md bg-[radial-gradient(ellipse_at_top,#052317_0%,#020604_48%,#050505_100%)] px-4 py-5 shadow-[0_8px_24px_rgba(0,0,0,0.35)] sm:px-7 sm:py-7 lg:px-10 lg:py-9">
-       <BackButton label="Back" />
+        <BackButton label="Back" />
         <header className="mt-8 sm:mt-2">
           <h1 className="text-sm font-semibold leading-none text-zinc-100 sm:text-base lg:text-lg">
             Security Settings
@@ -142,10 +142,6 @@ const SecuritySettings = () => {
             Manage role-based access with permission controls
           </p>
 
-
-
-
-          
           <div className="mt-4 overflow-x-auto rounded-sm">
             <div className="min-w-[520px]">
               <div className="grid grid-cols-[2.1fr_repeat(4,1fr)] bg-emerald-950/90 px-3 py-2 text-center text-[10px] font-medium text-emerald-400 sm:text-xs">
