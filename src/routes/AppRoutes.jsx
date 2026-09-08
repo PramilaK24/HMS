@@ -28,6 +28,7 @@ import AddStaff from '../pages/Staff/AddStaff';
 import StaffDetails from '../pages/Staff/StaffDetails';
 
 import Settings from '../pages/Settings/Settings';
+import SecuritySettings from '../pages/Settings/SecuritySettings';
 
 const AppRoutes = () => {
   return (
@@ -61,6 +62,7 @@ const AppRoutes = () => {
         <Route path="/staff/:id" element={<StaffDetails />} />
         
         <Route path="/settings" element={<Settings />} />
+        <Route path="/settings/security" element={<SecuritySettings />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/login" replace />} />
