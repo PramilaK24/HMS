@@ -1,7 +1,18 @@
 :root {
-  --primary-color: #007bff;
-  --secondary-color: #6c757d;
-  --background-color: #f4f6f9;
-  --text-color: #333;
-  --sidebar-bg: #2c3e50;
+  /* Background */
+  --bg-dark: #0E0E0E;
+  
+  /* Typography */
+  --text-primary: #FFFFFF;
+  --text-highlight: #0EFF7B;
+  --text-accent: #00A048;
+
+  /* Buttons & Elements */
+  --btn-bg-solid: #025126;
+  --btn-bg-gradient: linear-gradient(90deg, #025126 0%, #0D7F41 50%, #025126 100%);
+  
+  /* Layout components */
+  --sidebar-bg: #025126;
+  --header-bg: #1a1a1a;
+  --border-color: #333;
 }
