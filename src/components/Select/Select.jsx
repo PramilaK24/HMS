@@ -1,11 +1,3 @@
-import React from 'react';
-
-const Select = () => {
-  return (
-    <div>
-      Select Component
-    </div>
-  );
-};
-
-export default Select;
+export default function Select({ children, className = '', ...props }) {
+  return <select className={className} {...props}>{children}</select>;
+}
