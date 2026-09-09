@@ -7,6 +7,7 @@ const Sidebar = () => {
       <h2>HMS Sidebar</h2>
       <ul>
         <li><Link to="/dashboard" style={{color: 'white'}}>Dashboard</Link></li>
+        <li><Link to="/appointments" style={{color: 'white'}}>Appointments</Link></li>
         <li><Link to="/patients" style={{color: 'white'}}>Patients</Link></li>
         <li><Link to="/doctors" style={{color: 'white'}}>Doctors</Link></li>
         <li><Link to="/clinical-services" style={{color: 'white'}}>Clinical Services</Link></li>

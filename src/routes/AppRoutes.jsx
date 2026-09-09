@@ -7,6 +7,7 @@ import Login from '../pages/Login/Login';
 import ForgotPassword from '../pages/ForgotPassword/ForgotPassword';
 
 import Dashboard from '../pages/Dashboard/Dashboard';
+import Appointments from '../pages/Appointments/Appointments';
 import Patients from '../pages/Patients/Patients';
 import AddPatient from '../pages/Patients/AddPatient';
 import PatientDetails from '../pages/Patients/PatientDetails';
@@ -40,6 +41,7 @@ const AppRoutes = () => {
 
       <Route element={<DashboardLayout />}>
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/appointments" element={<Appointments />} />
         
         <Route path="/patients" element={<Patients />} />
         <Route path="/patients/add" element={<AddPatient />} />
