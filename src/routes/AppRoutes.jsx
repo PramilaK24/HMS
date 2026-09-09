@@ -7,6 +7,7 @@ import Login from '../pages/Login/Login';
 import ForgotPassword from '../pages/ForgotPassword/ForgotPassword';
 
 import Dashboard from '../pages/Dashboard/Dashboard';
+import Appointments from '../pages/Appointments/Appointments';
 import Patients from '../pages/Patients/Patients';
 import AddPatient from '../pages/Patients/AddPatient';
 import PatientDetails from '../pages/Patients/PatientDetails';
@@ -28,6 +29,7 @@ import AddStaff from '../pages/Staff/AddStaff';
 import StaffDetails from '../pages/Staff/StaffDetails';
 
 import Settings from '../pages/Settings/Settings';
+import SecuritySettings from '../pages/Settings/SecuritySettings';
 
 const AppRoutes = () => {
   return (
@@ -39,6 +41,7 @@ const AppRoutes = () => {
 
       <Route element={<DashboardLayout />}>
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/appointments" element={<Appointments />} />
         
         <Route path="/patients" element={<Patients />} />
         <Route path="/patients/add" element={<AddPatient />} />
@@ -61,6 +64,7 @@ const AppRoutes = () => {
         <Route path="/staff/:id" element={<StaffDetails />} />
         
         <Route path="/settings" element={<Settings />} />
+        <Route path="/settings/security" element={<SecuritySettings />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/login" replace />} />
