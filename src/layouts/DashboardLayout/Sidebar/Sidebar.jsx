@@ -15,6 +15,7 @@ const Sidebar = () => {
             Dashboard
           </Link>
         </li>
+        <li><Link to="/appointments" style={{color: 'white'}}>Appointments</Link></li>
         <li>
           <Link to="/patients" style={{ color: "white" }}>
             Patients
