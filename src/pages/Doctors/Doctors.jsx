@@ -1,17 +1,28 @@
 import { useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Icon } from '@iconify/react';
-import userRound from '@iconify-icons/lucide/user-round';
-import userRoundPlus from '@iconify-icons/lucide/user-round-plus';
 import Card from '../../components/Card/Card';
 import Button from '../../components/Button/Button';
 import Search from '../../components/Search/Search';
 import Select from '../../components/Select/Select';
+import Pagination from '../../components/Pagination/Pagination';
 
 export default function Doctors() {
   const [doctors] = useState(loadDoctors);
-  const [query, setQuery] = useState('');
-  const [department, setDepartment] = useState('');
-  const [specialist, setSpecialist] = useState('');
+  const [params, setParams] = useSearchParams();
+  const query = params.get('q') || '';
+  const department = params.get('department') || '';
+  const specialist = params.get('specialist') || '';
+  const requestedPage = Number(params.get('page'));
+  const pageSize = 9;
+  const updateFilter = (key, value) => {
+    setParams((current) => {
+      const next = new URLSearchParams(current);
+      if (value) next.set(key, value); else next.delete(key);
+      next.delete('page');
+      return next;
+    }, { replace: true });
+  };
   const departments = [...new Set(doctors.map((doctor) => doctor.department))].sort();
   const specialists = [...new Set(doctors.map((doctor) => doctor.specialist))].sort();
   const visibleDoctors = doctors.filter((doctor) => (
@@ -19,6 +30,9 @@ export default function Doctors() {
     && (!specialist || doctor.specialist === specialist)
     && `${doctor.name} ${doctor.id} ${doctor.email}`.toLowerCase().includes(query.trim().toLowerCase())
   ));
+  const page = Math.min(Number.isSafeInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1, Math.max(1, Math.ceil(visibleDoctors.length / pageSize)));
+  const pageDoctors = visibleDoctors.slice((page - 1) * pageSize, page * pageSize);
+  const returnTo = `/doctors${params.size ? `?${params}` : ''}`;
   const selectClass = 'max-w-full rounded-md border border-text-accent/60 bg-[#08170f] px-3 py-2 text-xs text-white/85 focus:outline-2 focus:outline-text-highlight';
 
   return (
@@ -30,38 +44,41 @@ export default function Doctors() {
             Total Doctors <span className="inline-flex min-w-6 items-center justify-center rounded-full bg-btn-solid px-2 py-1 text-text-highlight">{doctors.length}</span>
           </p>
         </div>
-        <Button disabled title="Add Doctor form is scheduled for the next implementation stage" className="flex items-center gap-2 rounded-md border border-text-accent/40 bg-btn-solid px-5 py-2 text-sm text-white/60 disabled:cursor-not-allowed">
-          <Icon icon={userRoundPlus} width="18" aria-hidden="true" /> Add Doctor
+        <Button as={Link} to="/doctors/add" state={{ returnTo }} className="border border-text-accent/60 bg-btn-solid px-5 py-2 text-sm text-white hover:bg-text-accent/60">
+          <Icon icon="solar:user-plus-linear" width="18" aria-hidden="true" /> Add Doctor
         </Button>
       </div>
 
       <div className="my-5 flex flex-wrap items-center gap-3">
-        <Select aria-label="Filter by department" value={department} onChange={(event) => setDepartment(event.target.value)} className={selectClass}>
+        <Select aria-label="Filter by department" value={department} onChange={(event) => updateFilter('department', event.target.value)} className={selectClass}>
           <option value="">All departments</option>
           {departments.map((value) => <option key={value}>{value}</option>)}
         </Select>
-        <Select aria-label="Filter by specialist" value={specialist} onChange={(event) => setSpecialist(event.target.value)} className={selectClass}>
+        <Select aria-label="Filter by specialist" value={specialist} onChange={(event) => updateFilter('specialist', event.target.value)} className={selectClass}>
           <option value="">All specialists</option>
           {specialists.map((value) => <option key={value}>{value}</option>)}
         </Select>
-        <Search aria-label="Search doctors by name, ID or email" placeholder="Search doctor name or ID" value={query} onChange={(event) => setQuery(event.target.value)} className="w-full sm:ml-auto sm:w-64" />
+        <Search aria-label="Search doctors by name, ID or email" placeholder="Search doctor name or ID" value={query} onChange={(event) => updateFilter('q', event.target.value)} className="w-full sm:ml-auto sm:w-64" />
+        {(query || department || specialist) && visibleDoctors.length > 0 && (
+          <Button onClick={() => setParams({}, { replace: true })} className="text-xs text-text-highlight underline underline-offset-4">Clear filters</Button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {visibleDoctors.map((doctor) => <DoctorCard key={doctor.id} doctor={doctor} />)}
+        {pageDoctors.map((doctor) => <DoctorCard key={doctor.id} doctor={doctor} returnTo={returnTo} />)}
       </div>
       {visibleDoctors.length === 0 && (
         <div className="rounded-lg border border-text-accent/30 py-12 text-center">
           <p>No doctors found.</p>
-          <Button onClick={() => { setQuery(''); setDepartment(''); setSpecialist(''); }} className="mt-3 text-sm text-text-highlight underline">Clear filters</Button>
+          <Button onClick={() => setParams({}, { replace: true })} className="mt-3 text-sm text-text-highlight underline">Clear filters</Button>
         </div>
       )}
-      <p role="status" className="mt-5 text-xs text-white/55">Showing {visibleDoctors.length} of {doctors.length} doctors</p>
+      <Pagination page={page} pageSize={pageSize} totalItems={visibleDoctors.length} itemLabel="doctors" onPageChange={(nextPage) => setParams((current) => { const next = new URLSearchParams(current); next.set('page', String(nextPage)); return next; })} />
     </section>
   );
 }
 
-function DoctorCard({ doctor }) {
+function DoctorCard({ doctor, returnTo }) {
   const joiningDate = new Date(`${doctor.joiningDate}T00:00:00`);
   const formattedDate = Number.isNaN(joiningDate.getTime()) ? 'Not specified' : joiningDate.toLocaleDateString('en-GB', {
     day: '2-digit', month: 'short', year: 'numeric',
@@ -69,8 +86,13 @@ function DoctorCard({ doctor }) {
 
   return (
     <Card as="article">
+      <div className="mb-2 flex justify-end">
+        <Button as={Link} to={`/doctors/${doctor.id}/edit`} state={{ returnTo }} aria-label={`Edit Dr. ${doctor.name}`} className="text-xs text-white/70 hover:text-text-highlight">
+          <Icon icon="solar:pen-linear" width="14" aria-hidden="true" /> Edit
+        </Button>
+      </div>
       <div className="mx-auto mb-3 flex size-14 items-center justify-center overflow-hidden rounded-full border-2 border-text-highlight bg-[#d8e8de] text-[#6f8678] shadow-[0_0_14px_#0eff7b35]">
-        <Icon icon={userRound} width="38" aria-hidden="true" />
+        <Icon icon="solar:user-rounded-bold" width="38" aria-hidden="true" />
       </div>
       <h2 className="text-center text-base font-medium text-text-highlight">Dr. {doctor.name}</h2>
       <p className="mt-1 min-h-8 text-center text-xs text-white/65">{doctor.qualification}</p>
@@ -88,7 +110,7 @@ function DoctorCard({ doctor }) {
         ))}
       </dl>
       <div className="mt-6 text-center">
-        <Button disabled title="Profile details will be available in the next implementation stage" className="rounded border border-text-accent/40 bg-btn-solid/50 px-4 py-1.5 text-xs text-white/50 disabled:cursor-not-allowed">
+        <Button as={Link} to={`/doctors/${doctor.id}`} state={{ returnTo }} aria-label={`View Dr. ${doctor.name} profile`} className="border border-text-accent/40 bg-btn-solid/50 px-4 py-1.5 text-xs text-white hover:bg-btn-solid">
           View Profile
         </Button>
       </div>
@@ -106,6 +128,9 @@ const profiles = [
   ['robert-thompson', 'Robert Thompson', 'MBBS, MD, DNB (Neurology)', 'Neurology', 'Neurology', '2015-06-20'],
   ['christopher-wilson', 'Christopher Wilson', 'MBBS, MD, DNB', 'Cardiology', 'Cardiology', '2015-06-19'],
   ['michael-anderson', 'Michael Anderson', 'MBBS, MS (General Surgery)', 'General Surgery', 'General Surgery', '2015-06-18'],
+  ['ananya-rao', 'Ananya Rao', 'MBBS, MD', 'Cardiology', 'Cardiology', '2019-08-12'],
+  ['arjun-mehta', 'Arjun Mehta', 'MBBS, MD', 'Dermatology', 'Dermatology', '2020-03-16'],
+  ['priya-sharma', 'Priya Sharma', 'MBBS, MS', 'Orthopaedics', 'Orthopaedic Surgery', '2021-01-04'],
 ];
 
 // Fictional records for the frontend demonstration only.
@@ -137,7 +162,9 @@ function isDoctor(record) {
     .every((field) => typeof record[field] === 'string');
 }
 
-function loadDoctors(storage = getStorage()) {
+// Kept in the existing module file for use by the Doctor pages.
+// oxlint-disable-next-line react/only-export-components
+export function loadDoctors(storage = getStorage()) {
   try {
     const saved = storage?.getItem(DOCTOR_STORAGE_KEY);
     if (saved !== null && saved !== undefined) {
@@ -153,7 +180,7 @@ function loadDoctors(storage = getStorage()) {
   return sampleDoctors.map((doctor) => ({ ...doctor }));
 }
 
-// Shared with the upcoming Add/Edit flow; kept here to use the existing file structure.
+// Shared with Add/Edit; kept here to use the existing file structure.
 // oxlint-disable-next-line react/only-export-components
 export function saveDoctors(doctors, storage = getStorage()) {
   if (!Array.isArray(doctors) || !doctors.every(isDoctor)
