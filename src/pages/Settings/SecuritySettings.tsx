@@ -69,7 +69,7 @@ const SecuritySettings = () => {
   "
       >
         <BackButton label="Back" />
-        <header className="mt-8 sm:mt-12">
+        <header className="mt-3 sm:mt-6">
           <h1 className="text-sm font-semibold leading-none text-zinc-100 sm:text-base lg:text-lg">
             Security Settings
           </h1>

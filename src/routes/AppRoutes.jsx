@@ -16,7 +16,10 @@ import Doctors from '../pages/Doctors/Doctors';
 import AddDoctor from '../pages/Doctors/AddDoctor';
 import DoctorDetails from '../pages/Doctors/DoctorDetails';
 
-import ClinicalServices from '../pages/ClinicalServices/ClinicalServices';
+// clinical services
+import LaboratoryAndRadiology from '../pages/ClinicalServices/LaboratoryAndRadiology';
+import BloodBankAndDonorList from '../pages/ClinicalServices/BloodBankAndDonorList';
+import AmbulanceMangement from '../pages/ClinicalServices/AmbulanceMangement';
 
 import Billing from '../pages/Billing/Billing';
 import Invoice from '../pages/Billing/Invoice';
@@ -49,9 +52,12 @@ const AppRoutes = () => {
         
         <Route path="/doctors" element={<Doctors />} />
         <Route path="/doctors/add" element={<AddDoctor />} />
+        <Route path="/doctors/:id/edit" element={<AddDoctor />} />
         <Route path="/doctors/:id" element={<DoctorDetails />} />
         
-        <Route path="/clinical-services" element={<ClinicalServices />} />
+        <Route path="/ambulance-management" element={<AmbulanceMangement />} />
+        <Route path="/blood-and-donor" element={<BloodBankAndDonorList />} />
+        <Route path="/laboratory-radiology" element={<LaboratoryAndRadiology />} />
         
         <Route path="/billing" element={<Billing />} />
         <Route path="/billing/invoice/:id" element={<Invoice />} />
