@@ -22,7 +22,6 @@ import BloodBankAndDonorList from '../pages/ClinicalServices/BloodBankAndDonorLi
 import AmbulanceMangement from '../pages/ClinicalServices/AmbulanceMangement';
 
 import Billing from '../pages/Billing/Billing';
-import Invoice from '../pages/Billing/Invoice';
 
 import Inventory from '../pages/Inventory/Inventory';
 import AddInventory from '../pages/Inventory/AddInventory';
@@ -60,7 +59,6 @@ const AppRoutes = () => {
         <Route path="/laboratory-radiology" element={<LaboratoryAndRadiology />} />
         
         <Route path="/billing" element={<Billing />} />
-        <Route path="/billing/invoice/:id" element={<Invoice />} />
         
         <Route path="/inventory" element={<Inventory />} />
         <Route path="/inventory/add" element={<AddInventory />} />
