@@ -1,7 +1,18 @@
 import React, { useState } from 'react';
+import { APPOINTMENTS_DATA } from '../../constants/mockAppointments';
+import { Icon } from '@iconify/react';
+import Dropdown from '../../components/Dropdown/Dropdown';
 
 const Appointments = () => {
   const [activeTab, setActiveTab] = useState('All');
+  const [activeTimeframe, setActiveTimeframe] = useState('Today');
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  
+  const [addForm, setAddForm] = useState({ department: '', doctor: '', status: '', appointmentType: '' });
+  const [editForm, setEditForm] = useState({ department: '', doctor: '', status: '', appointmentType: '' });
+  const [filterForm, setFilterForm] = useState({ department: '', doctor: '', status: '' });
   
   const stats = [
     { label: "Today's Total", count: 150, color: 'bg-green-900 text-green-300' },
@@ -10,27 +21,22 @@ const Appointments = () => {
     { label: "Cancelled", count: 2, color: 'bg-gray-800 text-gray-300' }
   ];
 
-  const appointmentsData = [
-    { id: 1, name: "Prakash", patientId: "SAH257384", department: "Orthopedics", doctor: "Dr.Sravan", room: "RM 305", type: "Follow-up", status: "Completed" },
-    { id: 2, name: "Prakash", patientId: "SAH257384", department: "Orthopedics", doctor: "Dr.Sravan", room: "N/A", type: "Check-up", status: "Cancelled" },
-    { id: 3, name: "Prakash", patientId: "SAH257384", department: "Orthopedics", doctor: "Dr.Sravan", room: "OP", type: "Consultation", status: "Normal" },
-    { id: 4, name: "Prakash", patientId: "SAH257384", department: "Orthopedics", doctor: "Dr.Sravan", room: "OP", type: "Consultation", status: "Severe" },
-    { id: 5, name: "Prakash", patientId: "SAH257384", department: "Orthopedics", doctor: "Dr.Sravan", room: "N/A", type: "Check-up", status: "Completed" },
-    { id: 6, name: "Prakash", patientId: "SAH257384", department: "Orthopedics", doctor: "Dr.Sravan", room: "N/A", type: "Check-up", status: "Completed" },
-    { id: 7, name: "Prakash", patientId: "SAH257384", department: "Orthopedics", doctor: "Dr.Sravan", room: "RM 405", type: "Follow-up", status: "Severe" },
-    { id: 8, name: "Prakash", patientId: "SAH257384", department: "Orthopedics", doctor: "Dr.Sravan", room: "RM 309", type: "Follow-up", status: "Severe" },
-    { id: 9, name: "Prakash", patientId: "SAH257384", department: "Orthopedics", doctor: "Dr.Sravan", room: "N/A", type: "Check-up", status: "Normal" }
-  ];
-
   const getStatusColor = (status) => {
     switch(status) {
       case 'Completed': return 'text-text-highlight';
       case 'Cancelled': return 'text-gray-400';
       case 'Normal': return 'text-blue-500';
       case 'Severe': return 'text-red-500';
+      case 'Critical': return 'text-orange-500';
       default: return 'text-white';
     }
   };
+
+  const filteredAppointments = APPOINTMENTS_DATA.filter(apt => {
+    const matchTime = apt.timeframe === activeTimeframe;
+    const matchStatus = activeTab === 'All' ? true : apt.status === activeTab;
+    return matchTime && matchStatus;
+  });
 
   return (
     <div className="text-white w-full">
@@ -49,7 +55,10 @@ const Appointments = () => {
             ))}
           </div>
         </div>
-        <button className="btn btn-gradient flex items-center gap-2">
+        <button 
+          onClick={() => setIsAddModalOpen(true)}
+          className="btn btn-gradient flex items-center gap-2"
+        >
           <span>+</span> Add Appointments
         </button>
       </div>
@@ -57,21 +66,30 @@ const Appointments = () => {
       {/* Controls row */}
       <div className="flex justify-between items-center mb-6">
         <div className="flex gap-2">
-          <button className="bg-btn-solid text-white px-6 py-2 rounded-md font-medium">Today</button>
-          <button className="bg-[#1a1a1a] text-gray-300 px-6 py-2 rounded-md font-medium hover:bg-gray-800">Upcoming</button>
-          <button className="bg-[#1a1a1a] text-gray-300 px-6 py-2 rounded-md font-medium hover:bg-gray-800">Past</button>
+          {['Today', 'Upcoming', 'Past'].map(time => (
+            <button 
+              key={time}
+              onClick={() => setActiveTimeframe(time)}
+              className={"px-6 py-2 rounded-md font-medium " + (activeTimeframe === time ? 'bg-btn-solid text-white' : 'bg-[#1a1a1a] text-gray-300 hover:bg-gray-800')}
+            >
+              {time}
+            </button>
+          ))}
         </div>
-        <div className="relative">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </span>
-          <input 
-            type="text" 
-            placeholder="Search patient name or ID" 
-            className="bg-transparent border border-gray-700 rounded-md pl-10 pr-10 py-2 w-72 focus:outline-none focus:border-text-accent"
-          />
+        <div className="flex gap-2">
+          <div className="relative">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+              <Icon icon="lucide:search" className="w-4 h-4" />
+            </span>
+            <input 
+              type="text" 
+              placeholder="Search patient name or ID" 
+              className="bg-transparent border border-gray-700 rounded-md pl-10 pr-10 py-2 w-72 focus:outline-none focus:border-text-accent"
+            />
+          </div>
+          <button onClick={() => setIsFilterModalOpen(true)} className="w-10 h-10 flex items-center justify-center rounded-md border border-gray-700 bg-transparent hover:bg-gray-800 transition">
+            <Icon icon="lucide:sliders-horizontal" className="w-5 h-5 text-gray-300" />
+          </button>
         </div>
       </div>
 
@@ -81,7 +99,7 @@ const Appointments = () => {
           <button 
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={"pb-3 px-4 text-sm font-medium " + (activeTab === tab ? 'text-text-highlight border-b-2 border-text-highlight' : 'text-gray-400 hover:text-gray-200')}
+            className={"pb-3 px-4 text-sm font-medium transition-colors " + (activeTab === tab ? 'text-text-highlight border-b-2 border-text-highlight' : 'text-gray-400 hover:text-gray-200')}
           >
             {tab}
           </button>
@@ -105,30 +123,32 @@ const Appointments = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-900">
-            {appointmentsData.map((apt) => (
-              <tr key={apt.id} className="hover:bg-[#1a1a1a] transition-colors">
-                <td className="p-4"><input type="checkbox" className="accent-text-accent" /></td>
-                <td className="p-4">{apt.name}</td>
-                <td className="p-4">{apt.patientId}</td>
-                <td className="p-4">{apt.department}</td>
-                <td className="p-4">{apt.doctor}</td>
-                <td className="p-4">{apt.room}</td>
-                <td className="p-4">{apt.type}</td>
-                <td className={"p-4 " + getStatusColor(apt.status)}>{apt.status}</td>
-                <td className="p-4 flex gap-3">
-                  <button className="text-blue-500 hover:text-blue-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                    </svg>
-                  </button>
-                  <button className="text-red-500 hover:text-red-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                  </button>
-                </td>
+            {filteredAppointments.length > 0 ? (
+              filteredAppointments.map((apt) => (
+                <tr key={apt.id} className="hover:bg-[#1a1a1a] transition-colors">
+                  <td className="p-4"><input type="checkbox" className="accent-text-accent" /></td>
+                  <td className="p-4">{apt.name}</td>
+                  <td className="p-4">{apt.patientId}</td>
+                  <td className="p-4">{apt.department}</td>
+                  <td className="p-4">{apt.doctor}</td>
+                  <td className="p-4">{apt.room}</td>
+                  <td className="p-4">{apt.type}</td>
+                  <td className={"p-4 " + getStatusColor(apt.status)}>{apt.status}</td>
+                  <td className="p-4 flex gap-3">
+                    <button onClick={() => setIsEditModalOpen(true)} className="text-blue-500 hover:text-blue-400">
+                      <Icon icon="lucide:pencil" className="w-4 h-4" />
+                    </button>
+                    <button className="text-red-500 hover:text-red-400">
+                      <Icon icon="lucide:trash-2" className="w-4 h-4" />
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="9" className="p-8 text-center text-gray-500">No appointments found for this filter combination.</td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>
@@ -147,6 +167,205 @@ const Appointments = () => {
           </button>
         </div>
       </div>
+
+      {/* Add Appointment Modal */}
+      {isAddModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50 p-4">
+          <div className="bg-[#111] border border-text-accent rounded-xl w-full max-w-2xl p-6 shadow-2xl relative">
+            
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-medium text-white">Add Appointment</h2>
+              <button onClick={() => setIsAddModalOpen(false)} className="w-7 h-7 flex items-center justify-center rounded-full bg-btn-solid text-text-highlight hover:opacity-80 transition">
+                <Icon icon="lucide:x" className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-5 mb-8">
+              <div>
+                <label className="block text-sm text-gray-300 mb-2">Patient Name</label>
+                <input type="text" value="Prakash" className="w-full bg-transparent border border-gray-700 rounded-md p-2.5 text-text-highlight focus:outline-none focus:border-text-accent" readOnly />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-300 mb-2">Patient ID</label>
+                <input type="text" placeholder="enter patient ID" className="w-full bg-transparent border border-gray-700 rounded-md p-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-text-accent" />
+              </div>
+              
+              <Dropdown 
+                label="Department"
+                placeholder="select department"
+                options={["Orthopedics", "Cardiology", "Neurology", "Pediatrics"]}
+                value={addForm.department}
+                onChange={(val) => setAddForm({...addForm, department: val})}
+              />
+              
+              <div className="relative">
+                <label className="block text-sm text-gray-300 mb-2">Appointment date</label>
+                <input type="text" placeholder="DD/MM/YYYY" className="w-full bg-transparent border border-gray-700 rounded-md p-2.5 text-gray-400 placeholder-gray-500 focus:outline-none focus:border-text-accent" />
+                <span className="absolute right-3 top-10 text-text-accent pointer-events-none"><Icon icon="lucide:calendar" className="w-5 h-5" /></span>
+              </div>
+              
+              <Dropdown 
+                label="Doctor"
+                placeholder="select doctor"
+                options={["Dr. Sravan", "Dr. Rajesh", "Dr. Meena", "Dr. Kiran"]}
+                value={addForm.doctor}
+                onChange={(val) => setAddForm({...addForm, doctor: val})}
+              />
+              
+              <Dropdown 
+                label="Status"
+                placeholder="select status"
+                options={["Normal", "Severe", "Critical", "Completed", "Cancelled"]}
+                value={addForm.status}
+                onChange={(val) => setAddForm({...addForm, status: val})}
+              />
+              
+              <div className="relative">
+                <label className="block text-sm text-gray-300 mb-2">Phone Number</label>
+                <input type="text" placeholder="enter phone number" className="w-full bg-transparent border border-gray-700 rounded-md p-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-text-accent pr-10" />
+                <span className="absolute right-3 top-10 text-text-accent pointer-events-none"><Icon icon="lucide:chevron-down" className="w-4 h-4" /></span>
+              </div>
+              
+              <Dropdown 
+                label="Appointment Type"
+                placeholder="select appointment type"
+                options={["Consultation", "Check-up", "Follow-up"]}
+                value={addForm.appointmentType}
+                onChange={(val) => setAddForm({...addForm, appointmentType: val})}
+              />
+            </div>
+
+            <div className="flex justify-center gap-4">
+              <button onClick={() => setIsAddModalOpen(false)} className="px-8 py-2.5 rounded-md border border-gray-600 text-gray-300 hover:bg-gray-800 transition">Cancel</button>
+              <button className="px-8 py-2.5 rounded-md bg-btn-solid text-white font-medium hover:opacity-90 transition">Add Appointment</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Appointment Modal */}
+      {isEditModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50 p-4">
+          <div className="bg-[#111] border border-text-accent rounded-xl w-full max-w-2xl p-6 shadow-2xl relative">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-medium text-white">Edit Appointment</h2>
+              <button onClick={() => setIsEditModalOpen(false)} className="w-7 h-7 flex items-center justify-center rounded-full bg-btn-solid text-text-highlight hover:opacity-80 transition">
+                <Icon icon="lucide:x" className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-5 mb-8">
+              <div>
+                <label className="block text-sm text-gray-300 mb-2">Patient Name</label>
+                <input type="text" value="Prakash" className="w-full bg-transparent border border-gray-700 rounded-md p-2.5 text-text-highlight focus:outline-none focus:border-text-accent" readOnly />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-300 mb-2">Patient ID</label>
+                <input type="text" placeholder="enter patient ID" className="w-full bg-transparent border border-gray-700 rounded-md p-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-text-accent" />
+              </div>
+              <Dropdown 
+                label="Department"
+                placeholder="select department"
+                options={["Orthopedics", "Cardiology", "Neurology", "Pediatrics"]}
+                value={editForm.department}
+                onChange={(val) => setEditForm({...editForm, department: val})}
+              />
+              <div className="relative">
+                <label className="block text-sm text-gray-300 mb-2">Appointment date</label>
+                <input type="text" placeholder="DD/MM/YYYY" className="w-full bg-transparent border border-gray-700 rounded-md p-2.5 text-gray-400 placeholder-gray-500 focus:outline-none focus:border-text-accent" />
+                <span className="absolute right-3 top-10 text-text-accent pointer-events-none"><Icon icon="lucide:calendar" className="w-5 h-5" /></span>
+              </div>
+              <Dropdown 
+                label="Doctor"
+                placeholder="select doctor"
+                options={["Dr. Sravan", "Dr. Rajesh", "Dr. Meena", "Dr. Kiran"]}
+                value={editForm.doctor}
+                onChange={(val) => setEditForm({...editForm, doctor: val})}
+              />
+              <Dropdown 
+                label="Status"
+                placeholder="select status"
+                options={["Normal", "Severe", "Critical", "Completed", "Cancelled"]}
+                value={editForm.status}
+                onChange={(val) => setEditForm({...editForm, status: val})}
+              />
+              <div className="relative">
+                <label className="block text-sm text-gray-300 mb-2">Phone Number</label>
+                <input type="text" placeholder="enter phone number" className="w-full bg-transparent border border-gray-700 rounded-md p-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-text-accent pr-10" />
+                <span className="absolute right-3 top-10 text-text-accent pointer-events-none"><Icon icon="lucide:chevron-down" className="w-4 h-4" /></span>
+              </div>
+              <Dropdown 
+                label="Appointment Type"
+                placeholder="select appointment type"
+                options={["Consultation", "Check-up", "Follow-up"]}
+                value={editForm.appointmentType}
+                onChange={(val) => setEditForm({...editForm, appointmentType: val})}
+              />
+            </div>
+
+            <div className="flex justify-center gap-4">
+              <button onClick={() => setIsEditModalOpen(false)} className="px-8 py-2.5 rounded-md border border-gray-600 text-gray-300 hover:bg-gray-800 transition">Cancel</button>
+              <button className="px-8 py-2.5 rounded-md bg-btn-solid text-white font-medium hover:opacity-90 transition">Update</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Filter Appointment Modal */}
+      {isFilterModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50 p-4">
+          <div className="bg-[#111] border border-text-accent rounded-xl w-full max-w-2xl p-6 shadow-2xl relative">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-medium text-white">Filter Appointment</h2>
+              <button onClick={() => setIsFilterModalOpen(false)} className="w-7 h-7 flex items-center justify-center rounded-full bg-btn-solid text-text-highlight hover:opacity-80 transition">
+                <Icon icon="lucide:x" className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-5 mb-8">
+              <div>
+                <label className="block text-sm text-gray-300 mb-2">Patient Name</label>
+                <input type="text" value="Prakash" className="w-full bg-transparent border border-gray-700 rounded-md p-2.5 text-text-highlight focus:outline-none focus:border-text-accent" readOnly />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-300 mb-2">Patient ID</label>
+                <input type="text" placeholder="enter patient ID" className="w-full bg-transparent border border-gray-700 rounded-md p-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-text-accent" />
+              </div>
+              <Dropdown 
+                label="Department"
+                placeholder="select department"
+                options={["Orthopedics", "Cardiology", "Neurology", "Pediatrics"]}
+                value={filterForm.department}
+                onChange={(val) => setFilterForm({...filterForm, department: val})}
+              />
+              <Dropdown 
+                label="Status"
+                placeholder="select status"
+                options={["Normal", "Severe", "Critical", "Completed", "Cancelled"]}
+                value={filterForm.status}
+                onChange={(val) => setFilterForm({...filterForm, status: val})}
+              />
+              <Dropdown 
+                label="Doctor"
+                placeholder="select doctor"
+                options={["Dr. Sravan", "Dr. Rajesh", "Dr. Meena", "Dr. Kiran"]}
+                value={filterForm.doctor}
+                onChange={(val) => setFilterForm({...filterForm, doctor: val})}
+              />
+              <div className="relative">
+                <label className="block text-sm text-gray-300 mb-2">Date</label>
+                <input type="text" placeholder="DD/MM/YYYY" className="w-full bg-transparent border border-gray-700 rounded-md p-2.5 text-gray-400 placeholder-gray-500 focus:outline-none focus:border-text-accent" />
+                <span className="absolute right-3 top-10 text-text-accent pointer-events-none"><Icon icon="lucide:calendar" className="w-5 h-5" /></span>
+              </div>
+            </div>
+
+            <div className="flex justify-center gap-4">
+              <button onClick={() => setIsFilterModalOpen(false)} className="px-8 py-2.5 rounded-md border border-gray-600 text-gray-300 hover:bg-gray-800 transition">Cancel</button>
+              <button className="px-8 py-2.5 rounded-md bg-btn-solid text-white font-medium hover:opacity-90 transition">Update</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
