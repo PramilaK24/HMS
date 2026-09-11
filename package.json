@@ -10,9 +10,22 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@iconify-icons/lucide": "^2.0.6",
     "@iconify/react": "^6.0.2",
+<<<<<<< HEAD
     "framer-motion": "^13.2.0",
+=======
+<<<<<<< HEAD
+    "date-fns": "^4.4.0",
+=======
+    "@mui/material": "^9.4.0",
+    "formik": "^2.4.9",
+>>>>>>> 969d73f908037ec2aa2f90323beb9f2375f69e32
+>>>>>>> cd36519cc67ccbc8d6cc544dadc43ff70977d529
     "react": "^19.2.8",
+    "react-datepicker": "^9.1.0",
     "react-dom": "^19.2.8",
     "react-router-dom": "^7.18.3"
   },
