@@ -12,7 +12,7 @@ import {
 } from '@mui/material';
 import { Icon } from '@iconify/react';
 import loginIllustration from '../../assets/login/LoginPage.png';
-import './Login.css';
+import './Login.scss';
 import { INITIAL_VALUES, validate, } from './utils';
 
 
@@ -43,7 +43,8 @@ const Login = () => {
           <img src={loginIllustration} alt="Healthcare illustration" className="login-visual" />
         </div>
 
-        <div className="login-card">
+        <div className='login-container'>
+          <div className="login-card">
           <h1 className="login-card__title">
             Welcome to <span className="accent">Stacklycare</span>
           </h1>
@@ -166,9 +167,11 @@ const Login = () => {
             )}
           </Formik>
         </div>
+         <div className="login-brand">Stacklycare</div>
+        </div>
       </div>
 
-      <div className="login-brand">Stacklycare</div>
+     
     </div>
   );
 };

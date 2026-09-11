@@ -9,6 +9,13 @@
   justify-content: center;
 }
 
+.login-container{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
 .login-page::before {
   content: "";
   position: absolute;
@@ -298,13 +305,13 @@
 
 .login-brand {
   position: absolute;
-  left: 50%;
+  left: 77%;
   bottom: 22px;
   transform: translateX(-50%);
-  font-size: clamp(3.5rem, 8vw, 8rem);
+  font-size: clamp(3.0rem, 8vw, 6rem);
   line-height: 1;
   letter-spacing: -0.08em;
-  font-weight: 600;
+  font-weight: 400;
   color: rgba(255, 255, 255, 0.08);
   pointer-events: none;
   user-select: none;
