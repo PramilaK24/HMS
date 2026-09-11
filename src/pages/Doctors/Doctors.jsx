@@ -145,6 +145,14 @@ const sampleDoctors = profiles.map(([id, name, qualification, department, specia
   phone: `+91 90000 ${String(index + 1).padStart(5, '0')}`,
   status: 'Active',
   photo: '',
+  profileDemo: true,
+  dateOfBirth: `${1984 + index % 8}-04-12`,
+  gender: 'Not specified',
+  bloodGroup: 'Not specified',
+  experience: String(10 + index % 6),
+  licenseNumber: `DEMO-${String(index + 1).padStart(4, '0')}`,
+  languages: 'English',
+  biography: 'Committed to compassionate care and clear communication with patients.',
 }));
 
 const DOCTOR_STORAGE_KEY = 'hms.doctors.v1';
@@ -171,7 +179,8 @@ export function loadDoctors(storage = getStorage()) {
       const records = JSON.parse(saved);
       if (Array.isArray(records) && records.every(isDoctor)
         && new Set(records.map(({ id }) => id)).size === records.length) {
-        return records;
+        // Preserve saved edits while supplying new demo fields for older seeded records.
+        return records.map((record) => ({ ...sampleDoctors.find((sample) => sample.id === record.id), ...record }));
       }
     }
   } catch {
