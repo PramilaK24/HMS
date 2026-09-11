@@ -2,7 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { Avatar, Button, Collapse, Divider, IconButton } from '@mui/material';
 import { Icon } from '@iconify/react';
-import './Sidebar.css';
+import './Sidebar.scss';
+import logo from '../../../assets/login/logo.png';
 
 const itemMatchesPath = (itemPath, currentPath) => {
   if (!itemPath) return false;
@@ -110,19 +111,23 @@ const Sidebar = ({
     <aside className={`sidebar-shell ${collapsed ? 'is-collapsed' : ''}`}>
       <div className="sidebar-topbar">
         <div className="sidebar-brand">
-          <div className="sidebar-brand__mark">
-            <Icon icon="material-symbols:health-and-safety-outline-rounded" />
-          </div>
+          {/* <div className="sidebar-brand__mark">
+            <Icon icon="el:lines" />
+          </div> */}
+          <IconButton className="sidebar-toggle" onClick={handleToggle} aria-label="Toggle sidebar">
+           <Icon icon="el:lines" />
+          </IconButton>
+          <img src={logo} alt="Stacklycare Logo" className="sidebar-brand__logo" />
 
           <div className="sidebar-brand__text">
             <strong>{brand.name}</strong>
-            <span>{brand.shortName || 'HMS'}</span>
+            {/* <span>{brand.shortName || 'HMS'}</span> */}
           </div>
         </div>
 
-        <IconButton className="sidebar-toggle" onClick={handleToggle} aria-label="Toggle sidebar">
+        {/* <IconButton className="sidebar-toggle" onClick={handleToggle} aria-label="Toggle sidebar">
           <Icon icon={collapsed ? 'material-symbols:chevron-right-rounded' : 'material-symbols:chevron-left-rounded'} />
-        </IconButton>
+        </IconButton> */}
       </div>
 
       <ul className="sidebar-nav">{sidebarItems.map((item) => renderNavItem(item))}</ul>

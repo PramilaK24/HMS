@@ -3,7 +3,7 @@ import SectionsCardComponent from './components/SectionsCardComponent';
 import EmergencyCasesComponent from './components/EmergencyCasesComponent';
 import NotificationsComponent from './components/NotificationsComponent';
 import ConsultationComponent from './components/ConsultationComponent';
-import './Dashboard.css';
+import './Dashboard.scss';
 
 const Dashboard = () => (
   <main className="dashboard-page">

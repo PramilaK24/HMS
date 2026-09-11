@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { IconButton, InputAdornment, TextField } from '@mui/material';
 import { Icon } from '@iconify/react';
 import { buildHeaderConfig, DEFAULT_HEADER_CONFIG } from './headerUtils';
-import './Header.css';
+import './Header.scss';
 
 const HEADER_DEFAULT_ACTIONS = [
   { id: 'notifications', icon: 'material-symbols:notifications-active-outline-rounded', ariaLabel: 'Notifications' },
