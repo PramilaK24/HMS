@@ -1,65 +1,124 @@
-import React from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { useMemo } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { IconButton, InputAdornment, TextField } from '@mui/material';
 import { Icon } from '@iconify/react';
+import { buildHeaderConfig, DEFAULT_HEADER_CONFIG } from './headerUtils';
+import './Header.css';
 
-const Header = () => {
+const HEADER_DEFAULT_ACTIONS = [
+  { id: 'notifications', icon: 'material-symbols:notifications-active-outline-rounded', ariaLabel: 'Notifications' },
+  { id: 'theme', icon: 'material-symbols:dark-mode-outline-rounded', ariaLabel: 'Theme toggle' },
+  { id: 'settings', icon: 'material-symbols:settings-outline-rounded', ariaLabel: 'Settings' },
+];
+
+const normalizeBreadcrumbs = (pathname) => {
+  const segments = pathname.split('/').filter(Boolean);
+
+  if (!segments.length) return [];
+
+  const crumbs = segments.map((segment, index) => {
+    const path = `/${segments.slice(0, index + 1).join('/')}`;
+    const label = segment
+      .replace(/-/g, ' ')
+      .replace(/\b\w/g, (char) => char.toUpperCase());
+
+    return { label, path };
+  });
+
+  return crumbs;
+};
+
+const Header = ({
+  title,
+  breadcrumbs,
+  searchPlaceholder,
+  onSearch,
+  actions = HEADER_DEFAULT_ACTIONS,
+}) => {
   const location = useLocation();
-  
-  // Extract and format the path name
-  const pathParts = location.pathname.split('/').filter(Boolean);
-  let title = 'Dashboard'; // default
-  
-  if (pathParts.length > 0) {
-    // Take the first part of the path and capitalize it
-    title = pathParts[0].charAt(0).toUpperCase() + pathParts[0].slice(1).replace('-', ' ');
-  }
+  const navigate = useNavigate();
+
+  const headerConfig = useMemo(() => {
+    const routeBreadcrumbs = normalizeBreadcrumbs(location.pathname);
+    const resolvedBreadcrumbs = breadcrumbs?.length ? breadcrumbs : routeBreadcrumbs;
+
+    return buildHeaderConfig({
+      title: title || routeBreadcrumbs.at(-1)?.label || DEFAULT_HEADER_CONFIG.title,
+      breadcrumbs: resolvedBreadcrumbs,
+      searchPlaceholder,
+      onSearch,
+      actions,
+    });
+  }, [breadcrumbs, location.pathname, onSearch, searchPlaceholder, title, actions]);
+
+  const handleSearch = (event) => {
+    if (typeof onSearch === 'function') {
+      onSearch(event.target.value);
+    }
+  };
+
+  const handleAction = (actionId) => {
+    if (actionId === 'settings') {
+      navigate('/settings');
+      return;
+    }
+
+    if (actionId === 'notifications') {
+      navigate('/dashboard');
+    }
+  };
 
   return (
-    <div className="h-16 bg-[#0E0E0E] border-b border-gray-900 flex items-center justify-between px-6">
-      
-      {/* Left side: Dynamic Title */}
-      <h2 className="text-text-highlight text-lg font-medium">
-        {title}
-      </h2>
+    <header className="header-shell">
+      <div className="header-page">
+        {headerConfig.breadcrumbs.length > 1 ? (
+          <nav className="header-breadcrumbs" aria-label="Breadcrumb navigation">
+            {headerConfig.breadcrumbs.map((crumb, index) => {
+              const isCurrent = index === headerConfig.breadcrumbs.length - 1;
 
-      {/* Right side: Search and Actions */}
-      <div className="flex items-center gap-4">
-        
-        {/* Search Bar */}
-        <div className="relative">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-accent">
-            <Icon icon="lucide:search" className="w-5 h-5" />
-          </span>
-          <input 
-            type="text" 
-            placeholder="Search patient name or ID" 
-            className="bg-transparent border border-text-accent rounded-md pl-10 pr-4 py-2 w-72 text-sm text-gray-300 placeholder-text-accent focus:outline-none"
-          />
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex items-center gap-2">
-          
-          {/* Moon Icon */}
-          <button className="w-10 h-10 flex items-center justify-center rounded-md bg-btn-solid text-white hover:opacity-90 transition">
-            <Icon icon="lucide:moon" className="w-5 h-5" />
-          </button>
-          
-          {/* Settings Icon */}
-          <button className="w-10 h-10 flex items-center justify-center rounded-md border border-gray-800 bg-[#111] text-text-highlight hover:bg-gray-900 transition">
-            <Icon icon="lucide:settings" className="w-5 h-5" />
-          </button>
-          
-          {/* Notification Icon */}
-          <button className="w-10 h-10 flex items-center justify-center rounded-md border border-gray-800 bg-[#111] text-text-highlight relative hover:bg-gray-900 transition">
-            {/* Notification Dot */}
-            <span className="absolute top-2 right-2.5 w-2 h-2 bg-text-highlight rounded-full"></span>
-            <Icon icon="lucide:bell" className="w-5 h-5" />
-          </button>
-
-        </div>
+              return (
+                <React.Fragment key={`${crumb.path}-${index}`}>
+                  <span className={`header-breadcrumb ${isCurrent ? 'header-breadcrumb--current' : ''}`}>
+                    {crumb.label}
+                  </span>
+                  {!isCurrent && <span className="header-breadcrumb__separator">/</span>}
+                </React.Fragment>
+              );
+            })}
+          </nav>
+        ) : (
+          <h1 className="header-title">{headerConfig.title}</h1>
+        )}
       </div>
-    </div>
+
+      <div className="header-actions">
+        <TextField
+          className="header-search"
+          variant="outlined"
+          size="small"
+          placeholder={headerConfig.searchPlaceholder}
+          onChange={handleSearch}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <Icon icon="material-symbols:search-rounded" />
+              </InputAdornment>
+            ),
+          }}
+        />
+
+        {headerConfig.actions.map((action) => (
+          <IconButton
+            key={action.id}
+            className="header-action-btn"
+            aria-label={action.ariaLabel || action.id}
+            onClick={() => handleAction(action.id)}
+          >
+            <Icon icon={action.icon} />
+          </IconButton>
+        ))}
+      </div>
+    </header>
   );
 };
 
