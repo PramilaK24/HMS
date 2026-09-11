@@ -78,7 +78,7 @@ export default function Pagination({
             ${
               currentPage >= pageCount
                 ? "bg-[#10251A] text-[#355B43] opacity-70 cursor-not-allowed"
-                : "bg-[#0EFF7B] text-black hover:bg-[#69EA7D]"
+                : "bg-text-highlight text-black hover:bg-[#69EA7D]"
             }
           `}
         >

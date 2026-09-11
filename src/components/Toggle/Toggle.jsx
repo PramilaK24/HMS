@@ -1,24 +1,12 @@
 import React from "react";
 import { motion } from "framer-motion";
 
-interface ToggleRootProps {
-  enabled: boolean;
-  onChange: () => void;
-  label: string;
-  size?: "sm" | "md";
-}
-
-interface ToggleThumbProps {
-  enabled: boolean;
-  size?: "sm" | "md";
-}
-
 const ToggleRoot = ({
   enabled,
   onChange,
   label,
   size = "md",
-}: ToggleRootProps) => {
+}) => {
   return (
     <motion.button
       type="button"
@@ -59,7 +47,7 @@ const ToggleRoot = ({
 const ToggleThumb = ({
   enabled,
   size = "md",
-}: ToggleThumbProps) => {
+}) => {
   return (
     <motion.span
       className={`

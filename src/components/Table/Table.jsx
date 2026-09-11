@@ -14,7 +14,7 @@ const Table = ({
 
   dropdowns = [],
   onDropdownChange,
-
+leftContent  = null,
   actions = [],
   statusConfig = {},
 
@@ -148,6 +148,7 @@ const Table = ({
       <div className="flex flex-wrap items-center justify-between gap-4 px-5 pt-6">
         {/* DROPDOWNS */}
         <div className="relative z-50 flex flex-wrap items-center gap-5">
+           {leftContent }
           {dropdowns.map((dropdown) => (
             <ClinicalServicesDropdown
               key={dropdown.key}
@@ -237,8 +238,8 @@ const Table = ({
                     <Icon
                       icon="tabler:check"
                       className="pointer-events-none absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 text-[#0A0A0A] peer-checked:block"
-                      width="12"
-                      height="12"
+                      width="16"
+                      height="16"
                     />
                   </label>
                 </th>
@@ -302,8 +303,8 @@ const Table = ({
                         <Icon
                           icon="tabler:check"
                           className="pointer-events-none absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 text-[#0A0A0A] peer-checked:block"
-                          width="12"
-                          height="12"
+                          width="16"
+                          height="16"
                         />
                       </label>
                     </td>

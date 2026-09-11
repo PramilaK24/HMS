@@ -1,8 +1,4 @@
-interface StatusBadgeProps {
-  status: "enabled" | "disabled";
-}
-
-export const StatusBadge = ({ status }: StatusBadgeProps) => {
+export const StatusBadge = ({ status }) => {
   const isEnabled = status === "enabled";
 
   return (

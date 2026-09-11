@@ -157,11 +157,15 @@
 
   .header-actions {
     width: 100%;
+    min-width: 0;
+    flex-wrap: wrap;
     justify-content: flex-end;
   }
 
   .header-search {
     max-width: none;
-    width: 180px;
+    min-width: 0;
+    width: 100%;
+    flex-basis: 100%;
   }
 }

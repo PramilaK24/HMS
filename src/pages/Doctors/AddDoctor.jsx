@@ -11,7 +11,13 @@ const emptyDoctor = {
   name: '', dateOfBirth: '', gender: '', maritalStatus: '', address: '', phone: '', email: '',
   city: '', country: '', joiningDate: '', designation: '', qualification: '', department: '',
   specialist: '', status: 'Active', shiftTiming: '', photo: '', nationalId: null, certificates: [],
+  bloodGroup: '', experience: '', licenseNumber: '', boardCertifications: '', memberships: '', languages: '', awards: '', biography: '',
 };
+const professionalFields = [
+  ['bloodGroup', 'Blood group'], ['experience', 'Experience (years)'], ['licenseNumber', 'License number'],
+  ['boardCertifications', 'Board certifications'], ['memberships', 'Professional memberships'],
+  ['languages', 'Languages spoken'], ['awards', 'Awards & recognitions'], ['biography', 'About the doctor'],
+];
 const departments = ['Cardiology', 'Anesthesiology', 'Dermatology', 'Gastroenterology', 'Gynaecology', 'Orthopaedics', 'Neurology', 'Paediatrics', 'General Surgery', 'Urology'];
 const selectClass = 'w-full rounded-md border border-white/20 bg-bg-dark px-3 py-2.5 text-sm text-white focus:outline-2 focus:outline-text-highlight';
 const fields = [
@@ -115,6 +121,7 @@ function DoctorForm({ id }) {
     const age = ageFromDate(cleaned.dateOfBirth);
     if (cleaned.dateOfBirth && (age === '' || age < 18 || age > 100)) nextErrors.dateOfBirth = 'Enter a date of birth for an adult aged 18–100.';
     if (cleaned.joiningDate && cleaned.dateOfBirth && cleaned.joiningDate < cleaned.dateOfBirth) nextErrors.joiningDate = 'Joining date must be after the date of birth.';
+    if (cleaned.experience && (!/^\d{1,2}$/.test(cleaned.experience) || Number(cleaned.experience) > 80 || (age !== '' && Number(cleaned.experience) > age - 18))) nextErrors.experience = 'Enter valid experience in whole years, consistent with the date of birth.';
     const current = loadDoctors();
     if (current.some((doctor) => doctor.id !== id && doctor.email.toLowerCase() === cleaned.email.toLowerCase())) nextErrors.email = 'A doctor with this email already exists.';
     setErrors(nextErrors);
@@ -164,6 +171,14 @@ function DoctorForm({ id }) {
               return <Input key={name} label={label} name={name} type={name === 'age' ? 'text' : type} required={name !== 'age'} readOnly={name === 'age'} maxLength={type === 'date' ? undefined : name === 'address' ? 300 : 120} error={errors[name]} value={name === 'age' ? ageFromDate(values.dateOfBirth) : values[name]} onChange={name === 'age' ? undefined : (event) => change(name, event.target.value)} placeholder={name === 'age' ? 'Calculated from date of birth' : undefined} />;
             })}
           </div>
+          <fieldset className="mt-8 border-t border-white/10 pt-6">
+            <legend className="px-2 text-base font-medium">Professional profile (optional)</legend>
+            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+              {professionalFields.map(([name, label]) => (
+                <Input key={name} label={label} name={name} type={name === 'experience' ? 'number' : 'text'} min={name === 'experience' ? 0 : undefined} max={name === 'experience' ? 80 : undefined} step={name === 'experience' ? 1 : undefined} maxLength={name === 'biography' ? 500 : 160} value={values[name]} error={errors[name]} onChange={(event) => change(name, event.target.value)} />
+              ))}
+            </div>
+          </fieldset>
           {error && <p role="alert" className="mt-5 text-sm text-red-300">{error}</p>}
           <div className="mt-8 flex flex-wrap justify-end gap-3">
             <Button onClick={() => { photoRequest.current++; setPhotoPending(false); setValues({ ...emptyDoctor, ...original }); setErrors({}); setError(''); }} className="border border-white/20 px-5 py-2 text-sm">{id ? 'Reset changes' : 'Clear'}</Button>

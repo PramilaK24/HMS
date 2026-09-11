@@ -22,10 +22,6 @@ const LaboratoryAndRadiology = () => {
   const [page, setPage] = useState(1);
   const [pageSize] = useState(7);
 
-  // --------------------------------
-  // Dropdown Change
-  // --------------------------------
-
   const handleDropdownChange = (key, value) => {
     setPage(1);
 
@@ -42,18 +38,10 @@ const LaboratoryAndRadiology = () => {
     }
   };
 
-  // --------------------------------
-  // Search Change
-  // --------------------------------
-
   const handleSearchChange = (value) => {
     setSearch(value);
     setPage(1);
   };
-
-  // --------------------------------
-  // Filter + Search
-  // --------------------------------
 
   const filteredData = useMemo(() => {
     const searchValue = search.trim().toLowerCase();
@@ -85,10 +73,6 @@ const LaboratoryAndRadiology = () => {
     });
   }, [department, month, year, search]);
 
-  // --------------------------------
-  // Pagination
-  // --------------------------------
-
   const paginatedData = useMemo(() => {
     const startIndex = (page - 1) * pageSize;
 
@@ -98,23 +82,9 @@ const LaboratoryAndRadiology = () => {
     );
   }, [filteredData, page, pageSize]);
 
-  // --------------------------------
-  // IMPORTANT
-  // --------------------------------
-  // When searching:
-  // Show ALL matching records.
-  //
-  // When not searching:
-  // Show only 7 records per page.
-  // --------------------------------
-
   const displayData = search.trim()
     ? filteredData
     : paginatedData;
-
-  // --------------------------------
-  // Pagination Page Size
-  // --------------------------------
 
   const effectivePageSize = search.trim()
     ? Math.max(filteredData.length, 1)
@@ -123,10 +93,6 @@ const LaboratoryAndRadiology = () => {
   return (
     <div className="box-border w-full min-h-full rounded-xl px-4 py-6 bg-[linear-gradient(180deg,#091810_0%,#0A0A0A_18%)]">
       <div className="w-full flex flex-col gap-5">
-
-        {/* =========================
-            TITLE
-        ========================= */}
 
         <div className="w-full max-w-131.25 flex flex-col gap-3">
           <h1 className="font-normal text-[20px] leading-[100%] text-white">
@@ -138,10 +104,6 @@ const LaboratoryAndRadiology = () => {
             place.
           </p>
         </div>
-
-        {/* =========================
-            ACTIONS
-        ========================= */}
 
         <div className="w-full flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
 
@@ -237,10 +199,6 @@ const LaboratoryAndRadiology = () => {
           </div>
         </div>
 
-        {/* =========================
-            RECENT TEST ORDERS
-        ========================= */}
-
         <div className="w-full flex flex-col gap-3">
           <h2 className="font-normal text-[20px] leading-[100%] text-white">
             Recent Test Orders
@@ -250,10 +208,6 @@ const LaboratoryAndRadiology = () => {
             List of all test orders
           </p>
         </div>
-
-        {/* =========================
-            TABLE
-        ========================= */}
 
         <Table
           columns={labColumns}
@@ -290,10 +244,6 @@ const LaboratoryAndRadiology = () => {
             console.log("Selected row:", row);
           }}
         />
-
-        {/* =========================
-            PAGINATION
-        ========================= */}
 
         <Pagination
           page={page}

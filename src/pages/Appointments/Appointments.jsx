@@ -1,28 +1,31 @@
 import React, { useState } from 'react';
-import { APPOINTMENTS_DATA } from '../../constants/mockAppointments';
+import { 
+  APPOINTMENTS_DATA, 
+  APPOINTMENT_STATS, 
+  DROPDOWN_OPTIONS, 
+  TABS, 
+  TABLE_HEADERS 
+} from '../../constants/mockAppointments';
 import { Icon } from '@iconify/react';
 import Dropdown from '../../components/Dropdown/Dropdown';
 import DateInput from '../../components/DateInput/DateInput';
+import ConfirmModal from '../../components/ConfirmModal/ConfirmModal';
 
 const Appointments = () => {
   const [activeTab, setActiveTab] = useState('All');
   const [activeTimeframe, setActiveTimeframe] = useState('Today');
+  
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState(null);
   
   const [appointments, setAppointments] = useState(APPOINTMENTS_DATA);
 
   const [addForm, setAddForm] = useState({ patientName: '', patientId: '', department: '', doctor: '', status: '', appointmentType: '', date: '', phone: '' });
   const [editForm, setEditForm] = useState({ patientName: '', patientId: '', department: '', doctor: '', status: '', appointmentType: '', date: '', phone: '' });
   const [filterForm, setFilterForm] = useState({ patientName: '', patientId: '', department: '', doctor: '', status: '', date: '' });
-  
-  const stats = [
-    { label: "Today's Total", count: 150, color: 'bg-green-900 text-green-300' },
-    { label: "Visited", count: 47, color: 'bg-blue-900 text-blue-300' },
-    { label: "Waiting", count: 12, color: 'bg-red-900 text-red-300' },
-    { label: "Cancelled", count: 2, color: 'bg-gray-800 text-gray-300' }
-  ];
 
   const getStatusColor = (status) => {
     switch(status) {
@@ -87,6 +90,13 @@ const Appointments = () => {
     setAddForm({ patientName: '', patientId: '', department: '', doctor: '', status: '', appointmentType: '', date: '', phone: '' });
   };
 
+  const handleDeleteConfirm = () => {
+    if (itemToDelete) {
+      setAppointments(appointments.filter(apt => apt.id !== itemToDelete.id));
+      setItemToDelete(null);
+    }
+  };
+
   return (
     <div className="text-white w-full">
       {/* Header section */}
@@ -94,7 +104,7 @@ const Appointments = () => {
         <div>
           <h1 className="text-2xl font-semibold mb-3">Appointment List</h1>
           <div className="flex gap-6 text-sm text-gray-300">
-            {stats.map((stat, index) => (
+            {APPOINTMENT_STATS.map((stat, index) => (
               <div key={index} className="flex items-center gap-2">
                 <span>{stat.label}</span>
                 <span className={"px-2 py-0.5 rounded-full text-xs " + stat.color}>
@@ -115,7 +125,7 @@ const Appointments = () => {
       {/* Controls row */}
       <div className="flex justify-between items-center mb-6">
         <div className="flex gap-2">
-          {['Today', 'Upcoming', 'Past'].map(time => (
+          {TABS.timeframes.map(time => (
             <button 
               key={time}
               onClick={() => setActiveTimeframe(time)}
@@ -144,7 +154,7 @@ const Appointments = () => {
 
       {/* Tabs */}
       <div className="flex justify-between border-b border-gray-800 mb-4 px-4">
-        {['All', 'Normal', 'Severe', 'Critical', 'Completed', 'Cancelled'].map(tab => (
+        {TABS.statuses.map(tab => (
           <button 
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -161,14 +171,9 @@ const Appointments = () => {
           <thead className="text-text-accent border-b border-gray-800">
             <tr>
               <th className="p-4 w-12"><input type="checkbox" className="accent-text-accent" /></th>
-              <th className="p-4 font-normal">Patient Name</th>
-              <th className="p-4 font-normal">Patient ID</th>
-              <th className="p-4 font-normal">Department</th>
-              <th className="p-4 font-normal">Doctor</th>
-              <th className="p-4 font-normal">Room no</th>
-              <th className="p-4 font-normal">Appointment type</th>
-              <th className="p-4 font-normal">Status</th>
-              <th className="p-4 font-normal">Edit</th>
+              {TABLE_HEADERS.map((header, idx) => (
+                <th key={idx} className="p-4 font-normal">{header}</th>
+              ))}
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-900">
@@ -187,7 +192,13 @@ const Appointments = () => {
                     <button onClick={() => openEditModal(apt)} className="text-blue-500 hover:text-blue-400">
                       <Icon icon="lucide:pencil" className="w-4 h-4" />
                     </button>
-                    <button className="text-red-500 hover:text-red-400">
+                    <button 
+                      onClick={() => {
+                        setItemToDelete(apt);
+                        setIsDeleteModalOpen(true);
+                      }} 
+                      className="text-red-500 hover:text-red-400"
+                    >
                       <Icon icon="lucide:trash-2" className="w-4 h-4" />
                     </button>
                   </td>
@@ -219,7 +230,7 @@ const Appointments = () => {
 
       {/* Add Appointment Modal */}
       {isAddModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/70 flex justify-center items-center z-50 p-4">
           <div className="bg-[#111] border border-text-accent rounded-xl w-full max-w-2xl p-6 shadow-2xl relative">
             
             <div className="flex justify-between items-center mb-6">
@@ -242,7 +253,7 @@ const Appointments = () => {
               <Dropdown 
                 label="Department"
                 placeholder="select department"
-                options={["Orthopedics", "Cardiology", "Neurology", "Pediatrics"]}
+                options={DROPDOWN_OPTIONS.departments}
                 value={addForm.department}
                 onChange={(val) => setAddForm({...addForm, department: val})}
               />
@@ -252,7 +263,7 @@ const Appointments = () => {
               <Dropdown 
                 label="Doctor"
                 placeholder="select doctor"
-                options={["Dr. Sravan", "Dr. Rajesh", "Dr. Meena", "Dr. Kiran"]}
+                options={DROPDOWN_OPTIONS.doctors}
                 value={addForm.doctor}
                 onChange={(val) => setAddForm({...addForm, doctor: val})}
               />
@@ -260,7 +271,7 @@ const Appointments = () => {
               <Dropdown 
                 label="Status"
                 placeholder="select status"
-                options={["Normal", "Severe", "Critical", "Completed", "Cancelled"]}
+                options={DROPDOWN_OPTIONS.statuses}
                 value={addForm.status}
                 onChange={(val) => setAddForm({...addForm, status: val})}
               />
@@ -273,7 +284,7 @@ const Appointments = () => {
               <Dropdown 
                 label="Appointment Type"
                 placeholder="select appointment type"
-                options={["Consultation", "Check-up", "Follow-up"]}
+                options={DROPDOWN_OPTIONS.appointmentTypes}
                 value={addForm.appointmentType}
                 onChange={(val) => setAddForm({...addForm, appointmentType: val})}
               />
@@ -295,7 +306,7 @@ const Appointments = () => {
 
       {/* Edit Appointment Modal */}
       {isEditModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/70 flex justify-center items-center z-50 p-4">
           <div className="bg-[#111] border border-text-accent rounded-xl w-full max-w-2xl p-6 shadow-2xl relative">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-medium text-white">Edit Appointment</h2>
@@ -316,7 +327,7 @@ const Appointments = () => {
               <Dropdown 
                 label="Department"
                 placeholder="select department"
-                options={["Orthopedics", "Cardiology", "Neurology", "Pediatrics"]}
+                options={DROPDOWN_OPTIONS.departments}
                 value={editForm.department}
                 onChange={(val) => setEditForm({...editForm, department: val})}
               />
@@ -324,14 +335,14 @@ const Appointments = () => {
               <Dropdown 
                 label="Doctor"
                 placeholder="select doctor"
-                options={["Dr. Sravan", "Dr. Rajesh", "Dr. Meena", "Dr. Kiran"]}
+                options={DROPDOWN_OPTIONS.doctors}
                 value={editForm.doctor}
                 onChange={(val) => setEditForm({...editForm, doctor: val})}
               />
               <Dropdown 
                 label="Status"
                 placeholder="select status"
-                options={["Normal", "Severe", "Critical", "Completed", "Cancelled"]}
+                options={DROPDOWN_OPTIONS.statuses}
                 value={editForm.status}
                 onChange={(val) => setEditForm({...editForm, status: val})}
               />
@@ -342,7 +353,7 @@ const Appointments = () => {
               <Dropdown 
                 label="Appointment Type"
                 placeholder="select appointment type"
-                options={["Consultation", "Check-up", "Follow-up"]}
+                options={DROPDOWN_OPTIONS.appointmentTypes}
                 value={editForm.appointmentType}
                 onChange={(val) => setEditForm({...editForm, appointmentType: val})}
               />
@@ -358,7 +369,7 @@ const Appointments = () => {
 
       {/* Filter Appointment Modal */}
       {isFilterModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/70 flex justify-center items-center z-50 p-4">
           <div className="bg-[#111] border border-text-accent rounded-xl w-full max-w-2xl p-6 shadow-2xl relative">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-medium text-white">Filter Appointment</h2>
@@ -379,21 +390,21 @@ const Appointments = () => {
               <Dropdown 
                 label="Department"
                 placeholder="select department"
-                options={["Orthopedics", "Cardiology", "Neurology", "Pediatrics"]}
+                options={DROPDOWN_OPTIONS.departments}
                 value={filterForm.department}
                 onChange={(val) => setFilterForm({...filterForm, department: val})}
               />
               <Dropdown 
                 label="Status"
                 placeholder="select status"
-                options={["Normal", "Severe", "Critical", "Completed", "Cancelled"]}
+                options={DROPDOWN_OPTIONS.statuses}
                 value={filterForm.status}
                 onChange={(val) => setFilterForm({...filterForm, status: val})}
               />
               <Dropdown 
                 label="Doctor"
                 placeholder="select doctor"
-                options={["Dr. Sravan", "Dr. Rajesh", "Dr. Meena", "Dr. Kiran"]}
+                options={DROPDOWN_OPTIONS.doctors}
                 value={filterForm.doctor}
                 onChange={(val) => setFilterForm({...filterForm, doctor: val})}
               />
@@ -407,9 +418,23 @@ const Appointments = () => {
           </div>
         </div>
       )}
+
+      {/* Global Confirm Delete Modal */}
+      <ConfirmModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setItemToDelete(null);
+        }}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Appointment"
+        message="Are you sure you want to delete this appointment? This action cannot be undone."
+        confirmText="Delete"
+      />
     </div>
   );
 };
 
 export default Appointments;
+
 
