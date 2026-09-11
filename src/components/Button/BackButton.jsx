@@ -1,11 +1,7 @@
 import { Icon } from "@iconify/react";
 import { useNavigate } from "react-router-dom";
 
-interface BackButtonProps {
-  label?: string;
-}
-
-const BackButton = ({ label = "Back" }: BackButtonProps) => {
+const BackButton = ({ label = "Back" }) => {
   const navigate = useNavigate();
 
   return (
