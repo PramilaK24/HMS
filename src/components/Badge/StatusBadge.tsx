@@ -7,11 +7,17 @@ export const StatusBadge = ({ status }: StatusBadgeProps) => {
 
   return (
     <span
-      className={`inline-flex items-center rounded-sm px-1 py-px text-[6px] font-semibold leading-none ${
-        isEnabled
-          ? "bg-emerald-500 text-[#042514]"
-          : "bg-zinc-600 text-zinc-200"
-      }`}
+      className={`
+        inline-flex items-center justify-center
+        px-3 py-1 rounded-sm
+        text-xs font-semibold leading-none
+        text-[var(--text-primary)]
+        ${
+          isEnabled
+            ? "bg-[var(--text-highlight)]"
+            : "bg-zinc-700"
+        }
+      `}
     >
       {isEnabled ? "Enabled" : "Disabled"}
     </span>

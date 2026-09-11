@@ -1,94 +1,89 @@
-import React, { useState } from "react";
-import { Toggle } from "../../components/Toggle/Toggle";
-// --- CUSTOM PIXEL-PERFECT TOGGLE ---
+import React from "react";
+import { motion } from "framer-motion";
+
 const MatrixToggle = ({ enabled, onChange }: { enabled: boolean; onChange: () => void }) => (
-  <button
+  <motion.button
     type="button"
     onClick={onChange}
-    className={`relative inline-flex h-[20px] w-[38px] shrink-0 items-center rounded-full border transition-all duration-300 ${
-      enabled 
-        ? "border-emerald-500/50 bg-transparent" 
-        : "border-zinc-700 bg-transparent"
+    whileHover={{ scale: 1.1 }}
+    whileTap={{ scale: 0.92 }}
+    className={`relative inline-flex h-[20px] w-[38px] shrink-0 cursor-pointer items-center rounded-full border transition-colors duration-300 ${
+      enabled
+        ? "border-[var(--text-highlight)]/50"
+        : "border-[var(--text-accent)]/40"
     }`}
   >
-    <span
-      className={`h-[12px] w-[12px] rounded-full transition-all duration-300 ${
-        enabled 
-          ? "translate-x-[20px] bg-[#10FF8D] shadow-[0_0_10px_#10FF8D]" 
-          : "translate-x-1.5 bg-zinc-500"
+    <motion.span
+      className={`h-[12px] w-[12px] rounded-full ${
+        enabled
+          ? "bg-[var(--text-highlight)] shadow-[0_0_10px_var(--text-highlight)]"
+          : "bg-[var(--btn-toggle-disabled)]"
       }`}
+      animate={{ x: enabled ? 20 : 6 }}
+      transition={{ type: "spring", stiffness: 500, damping: 30, mass: 0.6 }}
     />
-  </button>
+  </motion.button>
 );
 
-const initialModules = [
-  { name: "View Patients records", roles: [true, true, true, true] },
-  { name: "Edit Patients records", roles: [true, false, false, false] },
-  { name: "Generate patients bill", roles: [true, true, true, true] },
-  { name: "Approve insurance claims", roles: [true, false, false, true] },
-  { name: "Manage Appointments", roles: [true, true, false, true] },
-  { name: "Manage Inventory and pharmacy", roles: [false, false, false, true] },
-  { name: "Ambulance dispatch & Transport Logs", roles: [false, false, false, true] },
-];
+type Module = { name: string; roles: boolean[] };
 
-const PermissionsMatrix = () => {
-  const [modules, setModules] = useState(initialModules);
+interface PermissionsMatrixProps {
+  modules: Module[];
+  onToggle: (mIdx: number, rIdx: number) => void;
+}
 
-  const togglePermission = (mIdx: number, rIdx: number) => {
-    setModules(prev => prev.map((m, i) => i === mIdx 
-      ? { ...m, roles: m.roles.map((r, j) => j === rIdx ? !r : r) } 
-      : m));
-  };
-
+const PermissionsMatrix = ({ modules, onToggle }: PermissionsMatrixProps) => {
   return (
     <section className="mt-12 w-full font-sans">
-      <header className="mb-2">
-        <h2 className="text-base font-medium text-zinc-100 tracking-tight">
+      <motion.header
+        className="mb-2"
+        initial={{ opacity: 0, y: -6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+      >
+        <h2 className="text-base font-medium text-[var(--text-primary)] tracking-tight">
           Access & Permissions
         </h2>
-        <p className="mt-1 text-[11px] text-zinc-500">
+        <p className="mt-1 text-[11px] text-[var(--btn-toggle-disabled)]">
           Manage role-based access with permission controls
         </p>
-      </header>
+      </motion.header>
 
       <div className="overflow-hidden rounded-md">
-        {/* Header Grid */}
-        <div className="grid grid-cols-[2fr_repeat(4,1fr)] bg-[#041d14] py-3 px-4 items-center">
-          <span className="text-[11px] font-medium text-[#10B981] text-left">Modules</span>
-          <span className="text-[11px] font-medium text-[#10B981] text-center">Receptionist</span>
-          <span className="text-[11px] font-medium text-[#10B981] text-center">Doctor</span>
-          <span className="text-[11px] font-medium text-[#10B981] text-center">Billing staff</span>
-          <span className="text-[11px] font-medium text-[#10B981] text-center">Admin</span>
-        </div>
+        <motion.div
+          className="grid grid-cols-[2fr_repeat(4,1fr)] bg-[var(--text-highlight)]/10 py-3 px-4 items-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3, delay: 0.1 }}
+        >
+          <span className="text-[11px] font-medium text-[var(--text-highlight)] text-left">Modules</span>
+          <span className="text-[11px] font-medium text-[var(--text-highlight)] text-center">Receptionist</span>
+          <span className="text-[11px] font-medium text-[var(--text-highlight)] text-center">Doctor</span>
+          <span className="text-[11px] font-medium text-[var(--text-highlight)] text-center">Billing staff</span>
+          <span className="text-[11px] font-medium text-[var(--text-highlight)] text-center">Admin</span>
+        </motion.div>
 
-        {/* Matrix Rows */}
         <div className="divide-y divide-white/[0.04]">
           {modules.map((module, mIdx) => (
-            <div 
-              key={mIdx} 
+            <motion.div
+              key={mIdx}
               className="grid grid-cols-[2fr_repeat(4,1fr)] px-4 py-3 items-center group"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.15 + mIdx * 0.05 }}
             >
-              <span className="text-[11px] text-zinc-300 font-normal pr-4 group-hover:text-white transition-colors">
+              <span className="text-[11px] text-[var(--text-primary)] font-normal pr-4 group-hover:text-white transition-colors">
                 {module.name}
               </span>
-              
               {module.roles.map((enabled, rIdx) => (
                 <div key={rIdx} className="flex justify-center">
-                  <Toggle
-                                           size="sm"
-                                           enabled={enabled}
-                                           onChange={() =>
-                                             togglePermission(mIdx, rIdx)
-                                           }
-                                           label={`${module.name}, role ${rIdx + 1}`}
-                                         >
-                                           <Toggle.Track enabled={enabled}>
-                                             <Toggle.Thumb enabled={enabled} size="sm" />
-                                           </Toggle.Track>
-                                         </Toggle>
+                  <MatrixToggle
+                    enabled={enabled}
+                    onChange={() => onToggle(mIdx, rIdx)}
+                  />
                 </div>
               ))}
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>

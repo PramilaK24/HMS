@@ -92,7 +92,7 @@ function DoctorCard({ doctor, returnTo }) {
         </Button>
       </div>
       <div className="mx-auto mb-3 flex size-14 items-center justify-center overflow-hidden rounded-full border-2 border-text-highlight bg-[#d8e8de] text-[#6f8678] shadow-[0_0_14px_#0eff7b35]">
-        <Icon icon="solar:user-rounded-bold" width="38" aria-hidden="true" />
+        {doctor.photo ? <img src={doctor.photo} alt={doctor.name} className="size-full object-cover" /> : <Icon icon="solar:user-rounded-bold" width="38" aria-hidden="true" />}
       </div>
       <h2 className="text-center text-base font-medium text-text-highlight">Dr. {doctor.name}</h2>
       <p className="mt-1 min-h-8 text-center text-xs text-white/65">{doctor.qualification}</p>

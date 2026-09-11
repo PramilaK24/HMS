@@ -10,7 +10,7 @@
   /* Buttons & Elements */
   --btn-bg-solid: #025126;
   --btn-bg-gradient: linear-gradient(90deg, #025126 0%, #0D7F41 50%, #025126 100%);
-  
+  --btn-toggle-disabled: #A0A0A0;
   /* Layout components */
   --sidebar-bg: #025126;
   --header-bg: #1a1a1a;

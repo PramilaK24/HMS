@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
-import Pagination from '../../../components/Pagination/Pagination';
-import { SAMPLE_INVOICES } from '../data/invoicesData';
+import Pagination from '../../components/Pagination/Pagination';
+import { SAMPLE_INVOICES } from '../../constants/billingConstants';
 
 export default function Invoices({ invoices = SAMPLE_INVOICES, onOpenInvoice }) {
   const navigate = useNavigate();
@@ -22,7 +22,6 @@ export default function Invoices({ invoices = SAMPLE_INVOICES, onOpenInvoice }) 
     );
   }, [invoices, query]);
 
-  const totalPages = Math.ceil(filteredInvoices.length / pageSize) || 1;
   const paginatedInvoices = useMemo(() => {
     const start = (currentPage - 1) * pageSize;
     return filteredInvoices.slice(start, start + pageSize);
@@ -41,7 +40,7 @@ export default function Invoices({ invoices = SAMPLE_INVOICES, onOpenInvoice }) 
       <h2 className="text-xl font-semibold text-white">Invoices</h2>
 
       {/* Outer Card Container */}
-      <div className="overflow-hidden rounded-2xl border border-text-accent/50 bg-[#08170f] p-5 shadow-[inset_0_0_14px_#00a04812]">
+      <div className="overflow-hidden rounded-2xl border border-[#3C3C3C]  p-5 shadow-[inset_0_0_14px_#00a04812]">
         
         {/* Card Header Row */}
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
@@ -83,7 +82,7 @@ export default function Invoices({ invoices = SAMPLE_INVOICES, onOpenInvoice }) 
         {/* Invoices Table */}
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs text-white">
-            <thead className="text-text-highlight bg-[#040f08] border-b border-text-accent/30 text-[11px] font-medium tracking-wide">
+            <thead className="text-text-highlight bg-[#091810] border-b border-text-accent/30 text-[11px] font-medium tracking-wide">
               <tr>
                 <th className="px-4 py-3 w-10">
                   <input type="checkbox" className="size-3.5 rounded accent-text-accent" />
@@ -114,7 +113,7 @@ export default function Invoices({ invoices = SAMPLE_INVOICES, onOpenInvoice }) 
             </thead>
             <tbody className="divide-y divide-text-accent/20">
               {paginatedInvoices.map((inv) => (
-                <tr key={inv.id} className="transition-colors hover:bg-white/[0.02]">
+                <tr key={inv.id} className="transition-colors">
                   <td className="px-4 py-3.5">
                     <input type="checkbox" className="size-3.5 rounded accent-text-accent" />
                   </td>
@@ -167,14 +166,13 @@ export default function Invoices({ invoices = SAMPLE_INVOICES, onOpenInvoice }) 
         </div>
       </div>
 
-      {/* Pagination Footer (Outside Card Container) */}
+      {/* Reusing team's Pagination component from src/components/Pagination/Pagination.jsx */}
       <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        startIndex={((currentPage - 1) * pageSize) + 1}
-        endIndex={Math.min(currentPage * pageSize, filteredInvoices.length)}
-        roomsCount={5}
-        onPageChange={(page) => setCurrentPage(page)}
+        page={currentPage}
+        pageSize={pageSize}
+        totalItems={filteredInvoices.length}
+        itemLabel="rooms"
+        onPageChange={(nextPage) => setCurrentPage(nextPage)}
       />
     </div>
   );

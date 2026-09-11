@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { APPOINTMENTS_DATA } from '../../constants/mockAppointments';
 import { Icon } from '@iconify/react';
 import Dropdown from '../../components/Dropdown/Dropdown';
+import DateInput from '../../components/DateInput/DateInput';
 
 const Appointments = () => {
   const [activeTab, setActiveTab] = useState('All');
@@ -10,9 +11,11 @@ const Appointments = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   
-  const [addForm, setAddForm] = useState({ department: '', doctor: '', status: '', appointmentType: '' });
-  const [editForm, setEditForm] = useState({ department: '', doctor: '', status: '', appointmentType: '' });
-  const [filterForm, setFilterForm] = useState({ department: '', doctor: '', status: '' });
+  const [appointments, setAppointments] = useState(APPOINTMENTS_DATA);
+
+  const [addForm, setAddForm] = useState({ patientName: '', patientId: '', department: '', doctor: '', status: '', appointmentType: '', date: '', phone: '' });
+  const [editForm, setEditForm] = useState({ patientName: '', patientId: '', department: '', doctor: '', status: '', appointmentType: '', date: '', phone: '' });
+  const [filterForm, setFilterForm] = useState({ patientName: '', patientId: '', department: '', doctor: '', status: '', date: '' });
   
   const stats = [
     { label: "Today's Total", count: 150, color: 'bg-green-900 text-green-300' },
@@ -32,11 +35,57 @@ const Appointments = () => {
     }
   };
 
-  const filteredAppointments = APPOINTMENTS_DATA.filter(apt => {
+  const filteredAppointments = appointments.filter(apt => {
     const matchTime = apt.timeframe === activeTimeframe;
     const matchStatus = activeTab === 'All' ? true : apt.status === activeTab;
     return matchTime && matchStatus;
   });
+
+  const openEditModal = (apt) => {
+    setEditForm({
+      patientName: apt.name || '',
+      patientId: apt.patientId || '',
+      department: apt.department || '',
+      doctor: apt.doctor || '',
+      status: apt.status || '',
+      appointmentType: apt.type || '',
+      date: apt.date || '',
+      phone: apt.phone || ''
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const isAddFormValid = 
+    addForm.patientName.trim() !== '' &&
+    addForm.patientId.trim() !== '' &&
+    addForm.department !== '' &&
+    addForm.date.trim() !== '' &&
+    addForm.doctor !== '' &&
+    addForm.status !== '' &&
+    addForm.phone.trim() !== '' &&
+    addForm.appointmentType !== '';
+
+  const handleAddAppointment = () => {
+    if (!isAddFormValid) return;
+
+    const newAppointment = {
+      id: Date.now(), 
+      name: addForm.patientName,
+      patientId: addForm.patientId,
+      department: addForm.department,
+      doctor: addForm.doctor,
+      room: "TBD",
+      type: addForm.appointmentType,
+      status: addForm.status,
+      timeframe: "Today", 
+      date: addForm.date,
+      phone: addForm.phone
+    };
+
+    setAppointments([newAppointment, ...appointments]);
+    setIsAddModalOpen(false);
+    setAddForm({ patientName: '', patientId: '', department: '', doctor: '', status: '', appointmentType: '', date: '', phone: '' });
+  };
 
   return (
     <div className="text-white w-full">
@@ -135,7 +184,7 @@ const Appointments = () => {
                   <td className="p-4">{apt.type}</td>
                   <td className={"p-4 " + getStatusColor(apt.status)}>{apt.status}</td>
                   <td className="p-4 flex gap-3">
-                    <button onClick={() => setIsEditModalOpen(true)} className="text-blue-500 hover:text-blue-400">
+                    <button onClick={() => openEditModal(apt)} className="text-blue-500 hover:text-blue-400">
                       <Icon icon="lucide:pencil" className="w-4 h-4" />
                     </button>
                     <button className="text-red-500 hover:text-red-400">
@@ -156,7 +205,7 @@ const Appointments = () => {
       {/* Pagination */}
       <div className="flex justify-between items-center mt-6 text-sm text-gray-400">
         <div>
-          Page <span className="text-white font-medium">1</span> of 5 (1 to 14 from 150 Patients)
+          Page <span className="text-white font-medium">1</span> of 5 (1 to {filteredAppointments.length} from {appointments.length} Patients)
         </div>
         <div className="flex gap-2">
           <button className="w-8 h-8 flex items-center justify-center rounded-full bg-[#1a1a1a] hover:bg-gray-800">
@@ -183,11 +232,11 @@ const Appointments = () => {
             <div className="grid grid-cols-2 gap-5 mb-8">
               <div>
                 <label className="block text-sm text-gray-300 mb-2">Patient Name</label>
-                <input type="text" value="Prakash" className="w-full bg-transparent border border-gray-700 rounded-md p-2.5 text-text-highlight focus:outline-none focus:border-text-accent" readOnly />
+                <input type="text" placeholder="enter patient name" value={addForm.patientName} onChange={(e) => setAddForm({...addForm, patientName: e.target.value})} className="w-full bg-transparent border border-gray-700 rounded-md p-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-text-accent" />
               </div>
               <div>
                 <label className="block text-sm text-gray-300 mb-2">Patient ID</label>
-                <input type="text" placeholder="enter patient ID" className="w-full bg-transparent border border-gray-700 rounded-md p-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-text-accent" />
+                <input type="text" placeholder="enter patient ID" value={addForm.patientId} onChange={(e) => setAddForm({...addForm, patientId: e.target.value})} className="w-full bg-transparent border border-gray-700 rounded-md p-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-text-accent" />
               </div>
               
               <Dropdown 
@@ -198,11 +247,7 @@ const Appointments = () => {
                 onChange={(val) => setAddForm({...addForm, department: val})}
               />
               
-              <div className="relative">
-                <label className="block text-sm text-gray-300 mb-2">Appointment date</label>
-                <input type="text" placeholder="DD/MM/YYYY" className="w-full bg-transparent border border-gray-700 rounded-md p-2.5 text-gray-400 placeholder-gray-500 focus:outline-none focus:border-text-accent" />
-                <span className="absolute right-3 top-10 text-text-accent pointer-events-none"><Icon icon="lucide:calendar" className="w-5 h-5" /></span>
-              </div>
+              <DateInput label="Appointment date" value={addForm.date} onChange={(val) => setAddForm({...addForm, date: val})} />
               
               <Dropdown 
                 label="Doctor"
@@ -222,8 +267,7 @@ const Appointments = () => {
               
               <div className="relative">
                 <label className="block text-sm text-gray-300 mb-2">Phone Number</label>
-                <input type="text" placeholder="enter phone number" className="w-full bg-transparent border border-gray-700 rounded-md p-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-text-accent pr-10" />
-                <span className="absolute right-3 top-10 text-text-accent pointer-events-none"><Icon icon="lucide:chevron-down" className="w-4 h-4" /></span>
+                <input type="text" placeholder="enter phone number" value={addForm.phone} onChange={(e) => setAddForm({...addForm, phone: e.target.value})} className="w-full bg-transparent border border-gray-700 rounded-md p-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-text-accent pr-10" />
               </div>
               
               <Dropdown 
@@ -237,7 +281,13 @@ const Appointments = () => {
 
             <div className="flex justify-center gap-4">
               <button onClick={() => setIsAddModalOpen(false)} className="px-8 py-2.5 rounded-md border border-gray-600 text-gray-300 hover:bg-gray-800 transition">Cancel</button>
-              <button className="px-8 py-2.5 rounded-md bg-btn-solid text-white font-medium hover:opacity-90 transition">Add Appointment</button>
+              <button 
+                onClick={handleAddAppointment}
+                disabled={!isAddFormValid}
+                className={"px-8 py-2.5 rounded-md text-white font-medium transition " + (isAddFormValid ? 'bg-btn-solid hover:opacity-90' : 'bg-gray-700 cursor-not-allowed opacity-50')}
+              >
+                Add Appointment
+              </button>
             </div>
           </div>
         </div>
@@ -257,11 +307,11 @@ const Appointments = () => {
             <div className="grid grid-cols-2 gap-5 mb-8">
               <div>
                 <label className="block text-sm text-gray-300 mb-2">Patient Name</label>
-                <input type="text" value="Prakash" className="w-full bg-transparent border border-gray-700 rounded-md p-2.5 text-text-highlight focus:outline-none focus:border-text-accent" readOnly />
+                <input type="text" placeholder="enter patient name" value={editForm.patientName} onChange={(e) => setEditForm({...editForm, patientName: e.target.value})} className="w-full bg-transparent border border-gray-700 rounded-md p-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-text-accent" />
               </div>
               <div>
                 <label className="block text-sm text-gray-300 mb-2">Patient ID</label>
-                <input type="text" placeholder="enter patient ID" className="w-full bg-transparent border border-gray-700 rounded-md p-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-text-accent" />
+                <input type="text" placeholder="enter patient ID" value={editForm.patientId} onChange={(e) => setEditForm({...editForm, patientId: e.target.value})} className="w-full bg-transparent border border-gray-700 rounded-md p-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-text-accent" />
               </div>
               <Dropdown 
                 label="Department"
@@ -270,11 +320,7 @@ const Appointments = () => {
                 value={editForm.department}
                 onChange={(val) => setEditForm({...editForm, department: val})}
               />
-              <div className="relative">
-                <label className="block text-sm text-gray-300 mb-2">Appointment date</label>
-                <input type="text" placeholder="DD/MM/YYYY" className="w-full bg-transparent border border-gray-700 rounded-md p-2.5 text-gray-400 placeholder-gray-500 focus:outline-none focus:border-text-accent" />
-                <span className="absolute right-3 top-10 text-text-accent pointer-events-none"><Icon icon="lucide:calendar" className="w-5 h-5" /></span>
-              </div>
+              <DateInput label="Appointment date" value={editForm.date} onChange={(val) => setEditForm({...editForm, date: val})} />
               <Dropdown 
                 label="Doctor"
                 placeholder="select doctor"
@@ -291,8 +337,7 @@ const Appointments = () => {
               />
               <div className="relative">
                 <label className="block text-sm text-gray-300 mb-2">Phone Number</label>
-                <input type="text" placeholder="enter phone number" className="w-full bg-transparent border border-gray-700 rounded-md p-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-text-accent pr-10" />
-                <span className="absolute right-3 top-10 text-text-accent pointer-events-none"><Icon icon="lucide:chevron-down" className="w-4 h-4" /></span>
+                <input type="text" placeholder="enter phone number" value={editForm.phone} onChange={(e) => setEditForm({...editForm, phone: e.target.value})} className="w-full bg-transparent border border-gray-700 rounded-md p-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-text-accent pr-10" />
               </div>
               <Dropdown 
                 label="Appointment Type"
@@ -325,11 +370,11 @@ const Appointments = () => {
             <div className="grid grid-cols-2 gap-5 mb-8">
               <div>
                 <label className="block text-sm text-gray-300 mb-2">Patient Name</label>
-                <input type="text" value="Prakash" className="w-full bg-transparent border border-gray-700 rounded-md p-2.5 text-text-highlight focus:outline-none focus:border-text-accent" readOnly />
+                <input type="text" placeholder="enter patient name" value={filterForm.patientName} onChange={(e) => setFilterForm({...filterForm, patientName: e.target.value})} className="w-full bg-transparent border border-gray-700 rounded-md p-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-text-accent" />
               </div>
               <div>
                 <label className="block text-sm text-gray-300 mb-2">Patient ID</label>
-                <input type="text" placeholder="enter patient ID" className="w-full bg-transparent border border-gray-700 rounded-md p-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-text-accent" />
+                <input type="text" placeholder="enter patient ID" value={filterForm.patientId} onChange={(e) => setFilterForm({...filterForm, patientId: e.target.value})} className="w-full bg-transparent border border-gray-700 rounded-md p-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-text-accent" />
               </div>
               <Dropdown 
                 label="Department"
@@ -352,16 +397,12 @@ const Appointments = () => {
                 value={filterForm.doctor}
                 onChange={(val) => setFilterForm({...filterForm, doctor: val})}
               />
-              <div className="relative">
-                <label className="block text-sm text-gray-300 mb-2">Date</label>
-                <input type="text" placeholder="DD/MM/YYYY" className="w-full bg-transparent border border-gray-700 rounded-md p-2.5 text-gray-400 placeholder-gray-500 focus:outline-none focus:border-text-accent" />
-                <span className="absolute right-3 top-10 text-text-accent pointer-events-none"><Icon icon="lucide:calendar" className="w-5 h-5" /></span>
-              </div>
+              <DateInput label="Date" value={filterForm.date} onChange={(val) => setFilterForm({...filterForm, date: val})} />
             </div>
 
             <div className="flex justify-center gap-4">
               <button onClick={() => setIsFilterModalOpen(false)} className="px-8 py-2.5 rounded-md border border-gray-600 text-gray-300 hover:bg-gray-800 transition">Cancel</button>
-              <button className="px-8 py-2.5 rounded-md bg-btn-solid text-white font-medium hover:opacity-90 transition">Update</button>
+              <button className="px-8 py-2.5 rounded-md bg-btn-solid text-white font-medium hover:opacity-90 transition">Apply Filter</button>
             </div>
           </div>
         </div>
@@ -371,3 +412,4 @@ const Appointments = () => {
 };
 
 export default Appointments;
+
