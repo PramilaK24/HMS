@@ -1,7 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 
-const MatrixToggle = ({ enabled, onChange }: { enabled: boolean; onChange: () => void }) => (
+const MatrixToggle = ({ enabled, onChange }) => (
   <motion.button
     type="button"
     onClick={onChange}
@@ -25,14 +25,7 @@ const MatrixToggle = ({ enabled, onChange }: { enabled: boolean; onChange: () =>
   </motion.button>
 );
 
-type Module = { name: string; roles: boolean[] };
-
-interface PermissionsMatrixProps {
-  modules: Module[];
-  onToggle: (mIdx: number, rIdx: number) => void;
-}
-
-const PermissionsMatrix = ({ modules, onToggle }: PermissionsMatrixProps) => {
+const PermissionsMatrix = ({ modules, onToggle }) => {
   return (
     <section className="mt-12 w-full font-sans">
       <motion.header

@@ -16,6 +16,14 @@ const normalizeBreadcrumbs = (pathname) => {
 
   if (!segments.length) return [];
 
+  // Doctor record IDs are route keys, not user-facing breadcrumb labels.
+  if (segments[0] === 'doctors') {
+    const crumbs = [{ label: 'Doctors', path: '/doctors' }];
+    if (segments[1]) crumbs.push({ label: segments[1] === 'add' ? 'Add Doctor' : 'Doctor Profile', path: `/doctors/${segments[1]}` });
+    if (segments[2] === 'edit') crumbs.push({ label: 'Edit Doctor', path: pathname });
+    return crumbs;
+  }
+
   const crumbs = segments.map((segment, index) => {
     const path = `/${segments.slice(0, index + 1).join('/')}`;
     const label = segment
