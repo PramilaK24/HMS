@@ -5,15 +5,7 @@ import { StatusBadge } from "../../components/Badge/StatusBadge";
 import BackButton from "../../components/Button/BackButton";
 import PermissionsMatrix from "../../components/SettingScreen/PermissionsMatrix";
 
-const ActionButton = ({
-  label,
-  subtext,
-  onClick,
-}: {
-  label: string;
-  subtext?: string;
-  onClick?: () => void;
-}) => (
+const ActionButton = ({ label, subtext, onClick }) => (
   <div className="flex flex-col items-center gap-0.5">
     <motion.button
       type="button"
@@ -49,7 +41,7 @@ const SecuritySettings = () => {
   const [loginAlerts, setLoginAlerts] = useState(true);
   const [modules, setModules] = useState(AccessPermissionsModules);
 
-  const togglePermission = (moduleIndex: number, roleIndex: number) =>
+  const togglePermission = (moduleIndex, roleIndex) =>
     setModules((current) =>
       current.map((module, index) =>
         index === moduleIndex
@@ -60,7 +52,7 @@ const SecuritySettings = () => {
 
   const rowVariants = {
     hidden: { opacity: 0, y: 10 },
-    visible: (i: number) => ({ opacity: 1, y: 0, transition: { duration: 0.35, delay: i * 0.08 } }),
+    visible: (i) => ({ opacity: 1, y: 0, transition: { duration: 0.35, delay: i * 0.08 } }),
   };
 
   return (
