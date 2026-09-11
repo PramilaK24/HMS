@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { Avatar, Button, Collapse, Divider, IconButton } from '@mui/material';
 import { Icon } from '@iconify/react';
-import './Sidebar.scss';
 import logo from '../../../assets/login/logo.png';
 
 const itemMatchesPath = (itemPath, currentPath) => {
@@ -62,12 +61,12 @@ const Sidebar = ({
 
     const itemContent = (
       <>
-        <span className="sidebar-nav__icon">
+        <span className="flex h-5 w-5 items-center justify-center text-base">
           <Icon icon={item.icon || 'material-symbols:radio-button-unchecked-rounded'} />
         </span>
-        <span className="sidebar-nav__label">{item.label}</span>
-        {hasChildren && (
-          <span className="sidebar-nav__arrow">
+        {!collapsed && <span className="truncate">{item.label}</span>}
+        {hasChildren && !collapsed && (
+          <span className="ml-auto text-white/60">
             <Icon icon={isExpanded ? 'material-symbols:keyboard-arrow-down-rounded' : 'material-symbols:chevron-right-rounded'} />
           </span>
         )}
@@ -76,11 +75,13 @@ const Sidebar = ({
 
     if (!hasChildren) {
       return (
-        <li key={item.path || item.label} className="sidebar-nav__item" style={{ paddingLeft: level * 10 }}>
+        <li key={item.path || item.label} className="list-none" style={{ paddingLeft: level * 10 }}>
           <NavLink
             to={item.path}
             end
-            className={({ isCurrent }) => `sidebar-nav__link ${isCurrent || isActive ? 'is-active' : ''}`}
+            className={({ isCurrent }) => `flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm transition-all duration-200 ${
+              isCurrent || isActive ? 'bg-[#0EFF7B1F] text-[#0EFF7B] shadow-[inset_0_0_0_1px_rgba(14,255,123,0.1)]' : 'text-white/75 hover:bg-white/5 hover:text-white'
+            } ${collapsed ? 'justify-center px-2' : ''}`}
           >
             {itemContent}
           </NavLink>
@@ -89,17 +90,19 @@ const Sidebar = ({
     }
 
     return (
-      <li key={item.path || item.label} className="sidebar-nav__item" style={{ paddingLeft: level * 8 }}>
+      <li key={item.path || item.label} className="list-none" style={{ paddingLeft: level * 8 }}>
         <button
           type="button"
-          className={`sidebar-nav__link sidebar-nav__button ${isActive ? 'is-active' : ''}`}
+          className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm transition-all duration-200 ${
+            isActive ? 'bg-[#0EFF7B1F] text-[#0EFF7B] shadow-[inset_0_0_0_1px_rgba(14,255,123,0.1)]' : 'text-white/75 hover:bg-white/5 hover:text-white'
+          } ${collapsed ? 'justify-center px-2' : ''}`}
           onClick={() => toggleItem(item.path)}
         >
           {itemContent}
         </button>
 
         <Collapse in={isExpanded} timeout="auto" unmountOnExit>
-          <ul className="sidebar-nav sidebar-nav--nested">
+          <ul className="mt-1 space-y-1 overflow-hidden pl-2">
             {item.children.map((child) => renderNavItem(child, level + 1))}
           </ul>
         </Collapse>
@@ -108,50 +111,52 @@ const Sidebar = ({
   };
 
   return (
-    <aside className={`sidebar-shell ${collapsed ? 'is-collapsed' : ''}`}>
-      <div className="sidebar-topbar">
-        <div className="sidebar-brand">
-          {/* <div className="sidebar-brand__mark">
-            <Icon icon="el:lines" />
-          </div> */}
-          <IconButton className="sidebar-toggle" onClick={handleToggle} aria-label="Toggle sidebar">
-           <Icon icon="el:lines" />
+    <aside className={`flex flex-col border-r border-[#0EFF7B1F] bg-[#05150f]/95 py-4 transition-all duration-200 ${collapsed ? 'w-20' : 'w-[260px]'}`}>
+      <div className="px-3 pb-4">
+        <div className="flex items-center gap-3 rounded-xl border border-[#0EFF7B1F] bg-[#0B120F]/70 px-2 py-2.5">
+          <IconButton
+            onClick={handleToggle}
+            aria-label="Toggle sidebar"
+            className="!flex !h-9 !w-9 !items-center !justify-center !rounded-lg !border !border-[#0EFF7B1F] !bg-[#0EFF7B14] !text-[#0EFF7B]"
+          >
+            <Icon icon="el:lines" width={18} height={18} />
           </IconButton>
-          <img src={logo} alt="Stacklycare Logo" className="sidebar-brand__logo" />
 
-          <div className="sidebar-brand__text">
-            <strong>{brand.name}</strong>
-            {/* <span>{brand.shortName || 'HMS'}</span> */}
-          </div>
+          {!collapsed && (
+            <>
+              <img src={logo} alt="Stacklycare Logo" className="h-8 w-8 rounded-md object-cover" />
+              <div className="min-w-0">
+                <div className="truncate text-sm font-semibold text-white">{brand.name}</div>
+              </div>
+            </>
+          )}
         </div>
-
-        {/* <IconButton className="sidebar-toggle" onClick={handleToggle} aria-label="Toggle sidebar">
-          <Icon icon={collapsed ? 'material-symbols:chevron-right-rounded' : 'material-symbols:chevron-left-rounded'} />
-        </IconButton> */}
       </div>
 
-      <ul className="sidebar-nav">{sidebarItems.map((item) => renderNavItem(item))}</ul>
+      <ul className="flex-1 space-y-1 overflow-y-auto px-2">{sidebarItems.map((item) => renderNavItem(item))}</ul>
 
-      <Divider className="sidebar-divider" />
+      <Divider className="!my-3 !border-[#0EFF7B1F]" />
 
-      <div className="sidebar-footer">
-        <div className="sidebar-profile">
-          <Avatar src={profileDetails.avatar} alt={profileDetails.name} className="sidebar-profile__avatar" />
+      <div className="px-3 pb-1">
+        <div className="flex items-center gap-3 rounded-xl border border-[#0EFF7B1F] bg-[#0B120F]/70 p-2">
+          <Avatar src={profileDetails.avatar} alt={profileDetails.name} className="!h-10 !w-10" />
 
-          <div className="sidebar-profile__meta">
-            <strong>{profileDetails.name}</strong>
-            <span>{profileDetails.role}</span>
-          </div>
+          {!collapsed && (
+            <div className="min-w-0 flex-1">
+              <div className="truncate text-sm font-semibold text-white">{profileDetails.name}</div>
+              <div className="truncate text-[11px] text-white/60">{profileDetails.role}</div>
+            </div>
+          )}
         </div>
 
         <Button
-          className="sidebar-logout"
+          className="!mt-3 !flex !w-full !items-center !justify-center !rounded-xl !border !border-[#0EFF7B1F] !bg-[#0EFF7B14] !px-3 !py-2.5 !text-sm !font-medium !normal-case !text-[#0EFF7B] hover:!bg-[#0EFF7B24]"
           type="button"
           onClick={onLogout}
           fullWidth
-          startIcon={<span className="sidebar-logout__icon"><Icon icon="material-symbols:logout-rounded" /></span>}
+          startIcon={<Icon icon="material-symbols:logout-rounded" />}
         >
-          <span className="sidebar-logout__label">Logout</span>
+          {!collapsed && <span>Logout</span>}
         </Button>
       </div>
     </aside>

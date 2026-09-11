@@ -1,0 +1,18 @@
+:root {
+  /* Background */
+  --bg-dark: #0E0E0E;
+  
+  /* Typography */
+  --text-primary: #FFFFFF;
+  --text-highlight: #0EFF7B;
+  --text-accent: #00A048;
+
+  /* Buttons & Elements */
+  --btn-bg-solid: #025126;
+  --btn-bg-gradient: linear-gradient(90deg, #025126 0%, #0D7F41 50%, #025126 100%);
+  --btn-toggle-disabled: #A0A0A0;
+  /* Layout components */
+  --sidebar-bg: #025126;
+  --header-bg: #1a1a1a;
+  --border-color: #333;
+}

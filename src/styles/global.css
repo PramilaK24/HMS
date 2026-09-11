@@ -1,0 +1,183 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg-dark: #0E0E0E;
+  --color-text-primary: #FFFFFF;
+  --color-text-highlight: #0EFF7B;
+  --color-text-accent: #00A048;
+  --color-btn-solid: #025126;
+  --color-sidebar: #025126;
+  --color-header: #1a1a1a;
+}
+
+html, body, #root {
+  margin: 0;
+  min-height: 100%;
+  height: 100%;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: #050d0a;
+  color: var(--text-primary);
+}
+
+.dashboard-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 250px;
+  background-color: var(--sidebar-bg);
+  color: var(--text-primary);
+  padding: 20px;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  height: 60px;
+  background-color: var(--header-bg);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+}
+
+.breadcrumb {
+  padding: 10px 20px;
+  background-color: var(--header-bg);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.page-content {
+  padding: 20px;
+  flex: 1;
+}
+
+.authlayout {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: var(--bg-dark);
+}
+
+/* Global Text Colors */
+.text-primary {
+  color: var(--text-primary);
+}
+
+.text-highlight {
+  color: var(--text-highlight);
+}
+
+.text-accent {
+  color: var(--text-accent);
+}
+
+/* Global Button Styles */
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-weight: bold;
+  cursor: pointer;
+  transition: opacity 0.3s ease;
+}
+
+.btn:hover {
+  opacity: 0.9;
+}
+
+.btn-solid {
+  background-color: var(--btn-bg-solid);
+}
+
+.btn-gradient {
+  background: var(--btn-bg-gradient);
+}
+
+/* Custom Scrollbar for Dropdowns and Lists */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #333;
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #555;
+}
+
+/* Custom Date Input - Hides native icon and stretches click target */
+.custom-date-input::-webkit-calendar-picker-indicator {
+  background: transparent;
+  bottom: 0;
+  color: transparent;
+  cursor: pointer;
+  height: auto;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: auto;
+}
+
+/* Custom React DatePicker Theme */
+.react-datepicker {
+  background-color: #111 !important;
+  border: 1px solid #333 !important;
+  font-family: inherit !important;
+  border-radius: 0.5rem !important;
+}
+
+.react-datepicker__header {
+  background-color: #1a1a1a !important;
+  border-bottom: 1px solid #333 !important;
+  border-top-left-radius: 0.5rem !important;
+  border-top-right-radius: 0.5rem !important;
+}
+
+.react-datepicker__current-month, 
+.react-datepicker__day-name {
+  color: #fff !important;
+}
+
+.react-datepicker__day {
+  color: #ccc !important;
+  border-radius: 0.25rem !important;
+}
+
+.react-datepicker__day:hover {
+  background-color: #025126 !important;
+  color: #fff !important;
+}
+
+.react-datepicker__day--selected, 
+.react-datepicker__day--keyboard-selected {
+  background-color: #0EFF7B !important;
+  color: #000 !important;
+  font-weight: bold;
+}
+
+.react-datepicker__day--outside-month {
+  color: #555 !important;
+}
+
+.react-datepicker-wrapper {
+  width: 100%;
+}
