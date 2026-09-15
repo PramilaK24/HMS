@@ -128,7 +128,7 @@ leftContent  = null,
         {/* Status Dot */}
         {config.dot !== false && (
           <span
-            className={`h-1.5 w-1.5 rounded-full ${config.dotClass || "bg-gray-400"}`}
+            className={`h-1.5 w-1.5 rounded-full ${config.dotClass || ""}`}
           />
         )}
 

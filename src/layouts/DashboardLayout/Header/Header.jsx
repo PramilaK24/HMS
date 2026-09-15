@@ -106,12 +106,14 @@ const Header = ({
           size="small"
           placeholder={headerConfig.searchPlaceholder}
           onChange={handleSearch}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <Icon icon="material-symbols:search-rounded" />
-              </InputAdornment>
-            ),
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Icon icon="material-symbols:search-rounded" />
+                </InputAdornment>
+              ),
+            },
           }}
         />
 
