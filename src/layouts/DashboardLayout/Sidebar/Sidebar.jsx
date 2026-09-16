@@ -111,7 +111,7 @@ const Sidebar = ({
   };
 
   return (
-    <aside className={`flex flex-col border-r border-[#0EFF7B1F] bg-[#05150f]/95 py-4 transition-all duration-200 ${collapsed ? 'w-20' : 'w-[260px]'}`}>
+    <aside className={`flex h-screen min-h-0 shrink-0 flex-col border-r border-[#0EFF7B1F] bg-[#05150f]/95 py-4 transition-all duration-200 ${collapsed ? 'w-20' : 'w-[260px]'}`}>
       <div className="px-3 pb-4">
         <div className="flex items-center gap-3 rounded-xl border border-[#0EFF7B1F] bg-[#0B120F]/70 px-2 py-2.5">
           <IconButton
@@ -133,7 +133,7 @@ const Sidebar = ({
         </div>
       </div>
 
-      <ul className="flex-1 space-y-1 overflow-y-auto px-2">{sidebarItems.map((item) => renderNavItem(item))}</ul>
+      <ul className="min-h-0 flex-1 space-y-1 overflow-y-auto overscroll-contain px-2 [scrollbar-color:#0EFF7B66_transparent] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#0EFF7B66] hover:[&::-webkit-scrollbar-thumb]:bg-[#0EFF7BCC]">{sidebarItems.map((item) => renderNavItem(item))}</ul>
 
       <Divider className="!my-3 !border-[#0EFF7B1F]" />
 
