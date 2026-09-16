@@ -15,7 +15,7 @@ export default function BillingInformation({ onCancel, onGenerate }) {
     setItems(items.filter((item) => item.id !== id));
   };
 
-  const inputCellClass = 'w-full bg-[#040f08] border border-text-accent/40 rounded px-2 py-1 text-xs text-white focus:outline-none';
+  const inputCellClass = 'w-full bg-[#040f08] border border-text-accent/40 rounded px-2 py-1 text-xs text-white focus:outline-none shadow-[inset_0_0_2px_#0EFF7B]';
 
   return (
     <div className="space-y-4">
@@ -24,9 +24,9 @@ export default function BillingInformation({ onCancel, onGenerate }) {
       {/* Table Container */}
       <div className="overflow-x-auto pb-2">
         <table className="w-full text-left text-xs text-white">
-          <thead className="text-text-highlight bg-[#040f08] font-semibold text-[11px]">
+          <thead className="text-text-highlight bg-[#040f08] font-semibold text-[13px]">
             <tr>
-              <th className="py-2.5 px-3">S No.</th>
+              <th className="py-2.5 px-3 w-16">S No.</th>
               <th className="py-2.5 px-3">Item code</th>
               <th className="py-2.5 px-3 min-w-[150px]">Name of drugs</th>
               <th className="py-2.5 px-3">Rack no</th>
@@ -35,17 +35,21 @@ export default function BillingInformation({ onCancel, onGenerate }) {
               <th className="py-2.5 px-3">Unit price</th>
               <th className="py-2.5 px-3">Discount</th>
               <th className="py-2.5 px-3">Tax</th>
-              <th className="py-2.5 px-3 relative">
+              {/* <th className="py-2.5 px-3 relative">
                 <span className="inline-block border-l-2 border-text-highlight h-3.5 mr-1 align-middle"></span>
                 <span>Tota</span>
-              </th>
+              </th> */}
+              <th className="py-2.5 px-3">Total</th>
               <th className="py-2.5 px-3 text-center">Remove</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-text-accent/20">
             {items.map((row) => (
               <tr key={row.id}>
-                <td className="py-2 px-3">{row.sNo}</td>
+                
+                <td className="py-2 px-2">
+                  <input type="text" defaultValue={row.sNo} className={inputCellClass} />
+                </td>
                 <td className="py-2 px-2">
                   <input type="text" defaultValue={row.itemCode} className={inputCellClass} />
                 </td>
@@ -96,7 +100,7 @@ export default function BillingInformation({ onCancel, onGenerate }) {
       <div className="flex flex-wrap items-center justify-end gap-3.5 pt-4">
         
         {/* Card 1: Sub total */}
-        <div className="w-32 sm:w-36 overflow-hidden rounded-md border border-text-accent/40 bg-[#025126] text-center shadow-md">
+        <div className="w-32 sm:w-36 overflow-hidden bg-[#025126] text-center shadow-md">
           <div className="bg-[#6B7280] py-2 text-xs font-bold text-white tracking-wide">
             Sub total
           </div>
@@ -106,7 +110,7 @@ export default function BillingInformation({ onCancel, onGenerate }) {
         </div>
 
         {/* Card 2: CGST (6%) */}
-        <div className="w-28 sm:w-32 overflow-hidden rounded-md border border-text-accent/40 bg-[#025126] text-center shadow-md">
+        <div className="w-28 sm:w-32 overflow-hidden  bg-[#025126] text-center shadow-md">
           <div className="bg-[#6B7280] py-2 text-xs font-bold text-white tracking-wide">
             CGST (6%)
           </div>
@@ -116,7 +120,7 @@ export default function BillingInformation({ onCancel, onGenerate }) {
         </div>
 
         {/* Card 3: SGST (6%) */}
-        <div className="w-28 sm:w-32 overflow-hidden rounded-md border border-text-accent/40 bg-[#025126] text-center shadow-md">
+        <div className="w-28 sm:w-32 overflow-hidden bg-[#025126] text-center shadow-md">
           <div className="bg-[#6B7280] py-2 text-xs font-bold text-white tracking-wide">
             SGST (6%)
           </div>
@@ -126,7 +130,7 @@ export default function BillingInformation({ onCancel, onGenerate }) {
         </div>
 
         {/* Card 4: Discount amount */}
-        <div className="w-36 sm:w-44 overflow-hidden rounded-md border border-text-accent/40 bg-[#025126] text-center shadow-md">
+        <div className="w-36 sm:w-44 overflow-hidden bg-[#025126] text-center shadow-md">
           <div className="bg-[#6B7280] py-2 text-xs font-bold text-white tracking-wide">
             Discount amount
           </div>
@@ -136,7 +140,7 @@ export default function BillingInformation({ onCancel, onGenerate }) {
         </div>
 
         {/* Card 5: Net Amount */}
-        <div className="w-44 sm:w-52 overflow-hidden rounded-md border border-text-accent/40 bg-[#025126] text-center shadow-md">
+        <div className="w-44 sm:w-52 overflow-hidden bg-[#025126] text-center shadow-md">
           <div className="bg-[#6B7280] py-2 text-xs font-bold text-white tracking-wide">
             Net Amount
           </div>

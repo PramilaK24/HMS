@@ -41,36 +41,36 @@ export default function PharmacyBillHeader() {
     });
   };
 
-  const inputClass = 'w-full rounded-md border border-text-accent/40 bg-[#040f08] px-3 py-1.5 text-xs font-medium text-text-highlight focus:border-text-highlight focus:outline-none';
-  const labelClass = 'w-32 shrink-0 text-xs font-medium text-white/80';
+  const inputClass = 'w-full  bg-[#0EFF7B0D] px-3 py-1.5 text-[14px] font-medium text-text-highlight focus:border-text-highlight focus:outline-none';
+  const labelClass = 'w-32 shrink-0 text-[16px] font-medium text-white/80';
 
   return (
     <div className="space-y-4">
       {/* Top Title & Filters Row */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-semibold text-white">Pharmacy bill generation</h2>
+          <h2 className="text-xl  text-white">Pharmacy bill generation</h2>
           <p className="mt-1 text-xs text-white/60">This is the information only related to pharmacy department</p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-end gap-4">
           {/* Search patient name or ID */}
           <div className="relative flex items-center">
             <Icon icon="lucide:search" width="14" className="absolute left-3 text-text-accent" />
             <input
               type="search"
               placeholder="Search patient name or ID"
-              className="w-56 rounded-full border border-text-accent/40 bg-[#040f08] py-1.5 pl-9 pr-3 text-xs text-white placeholder:text-white/40 focus:border-text-highlight focus:outline-none"
+              className="w-64 rounded-md border border-text-accent/50 bg-[#052315] py-2 pl-9 pr-3 text-xs text-white placeholder:text-white/40 focus:border-text-highlight focus:outline-none"
             />
           </div>
 
           {/* Patient name select */}
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-white/70">Patient name</span>
+          <div className="flex flex-col gap-1">
+            <label className="text-xs text-white/80 font-normal">Patient name</label>
             <select
               value={formData.name}
               onChange={(e) => handleChange('name', e.target.value)}
-              className="rounded-md border border-text-accent/40 bg-[#040f08] px-3 py-1.5 text-xs text-text-highlight focus:outline-none"
+              className="w-36 rounded-md border border-text-accent/50 bg-[#040f08] px-3 py-2 text-xs text-text-highlight focus:outline-none cursor-pointer"
             >
               <option value="Watson">Watson</option>
               <option value="Matthew">Matthew</option>
@@ -79,12 +79,12 @@ export default function PharmacyBillHeader() {
           </div>
 
           {/* Patient ID select */}
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-white/70">Patient ID</span>
+          <div className="flex flex-col gap-1">
+            <label className="text-xs text-white/80 font-normal">Patient ID</label>
             <select
               value={formData.patientId}
               onChange={(e) => handleChange('patientId', e.target.value)}
-              className="rounded-md border border-text-accent/40 bg-[#040f08] px-3 py-1.5 text-xs text-text-highlight focus:outline-none"
+              className="w-36 rounded-md border border-text-accent/50 bg-[#040f08] px-3 py-2 text-xs text-text-highlight focus:outline-none cursor-pointer"
             >
               <option value="SAH257384">SAH257384</option>
               <option value="SAH257385">SAH257385</option>
@@ -94,7 +94,7 @@ export default function PharmacyBillHeader() {
       </div>
 
       {/* 3-Column Card Form Container */}
-      <div className="rounded-2xl border border-text-accent/60 p-6 shadow-[inset_0_0_14px_#00a04812]">
+      <div className="rounded-[12px] border border-[#0EFF7B0D] p-6 shadow-[inset_0_0_14px_#00a04812]">
         <div className="grid grid-cols-1 gap-x-8 gap-y-4 lg:grid-cols-3">
           
           {/* Column 1 */}

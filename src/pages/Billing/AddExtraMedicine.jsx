@@ -44,14 +44,14 @@ export default function AddExtraMedicine({ onAddMedicine }) {
 
   return (
     <div className="space-y-3">
-      <h3 className="text-lg font-medium text-white">Add extra medicine</h3>
+      <h3 className="text-lg  text-white">Add extra medicine</h3>
 
-      <div className="rounded-2xl border border-text-accent/60 p-5 shadow-[inset_0_0_14px_#00a04812]">
+      <div className="rounded-[12px] border border-[#0EFF7B0D] p-5 shadow-[inset_0_0_14px_#00a04812]">
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-xs text-white">
+          <table className="w-full border-collapse text-[12px] text-white">
             <thead className="bg-[#040f08] text-text-highlight font-semibold">
-              <tr className="border border-text-accent/40">
-                <th className="p-2.5 text-center border-r border-text-accent/30 w-12">S No.</th>
+              <tr className="border border-[#0EFF7B1A]">
+                <th className="p-2.5 text-center border-r border-text-accent/30 w-16">S No.</th>
                 <th className="p-2.5 text-left border-r border-text-accent/30 min-w-[120px]">Item code</th>
                 <th className="p-2.5 text-left border-r border-text-accent/30 min-w-[140px]">Name of drugs</th>
                 <th className="p-2.5 text-center border-r border-text-accent/30 min-w-[110px]">Expire Date</th>
@@ -64,10 +64,10 @@ export default function AddExtraMedicine({ onAddMedicine }) {
               </tr>
             </thead>
             <tbody>
-              <tr className="border border-text-accent/40 bg-[#040f08]/60">
-                <td className="p-1 text-center border-r border-text-accent/30">{medicine.sNo}</td>
+              <tr className="border border-[#D9D9D9] bg-[#040f08]/60">
+                <td className="p-1 text-center border ">{medicine.sNo}</td>
                 
-                <td className="p-1 border-r border-text-accent/30">
+                <td className="p-1 border">
                   <select
                     value={medicine.itemCode}
                     onChange={(e) => handleChange('itemCode', e.target.value)}
@@ -79,7 +79,7 @@ export default function AddExtraMedicine({ onAddMedicine }) {
                   </select>
                 </td>
 
-                <td className="p-1 border-r border-text-accent/30">
+                <td className="p-1 border">
                   <select
                     value={medicine.nameOfDrugs}
                     onChange={(e) => handleChange('nameOfDrugs', e.target.value)}
@@ -91,7 +91,7 @@ export default function AddExtraMedicine({ onAddMedicine }) {
                   </select>
                 </td>
 
-                <td className="p-1 border-r border-text-accent/30">
+                <td className="p-1 border">
                   <input
                     type="text"
                     value={medicine.expireDate}
@@ -100,7 +100,7 @@ export default function AddExtraMedicine({ onAddMedicine }) {
                   />
                 </td>
 
-                <td className="p-1 border-r border-text-accent/30">
+                <td className="p-1 border">
                   <input
                     type="text"
                     value={medicine.quantity}
@@ -109,7 +109,7 @@ export default function AddExtraMedicine({ onAddMedicine }) {
                   />
                 </td>
 
-                <td className="p-1 border-r border-text-accent/30">
+                <td className="p-1 border">
                   <input
                     type="text"
                     value={medicine.unitPrice}
@@ -118,7 +118,7 @@ export default function AddExtraMedicine({ onAddMedicine }) {
                   />
                 </td>
 
-                <td className="p-1 border-r border-text-accent/30">
+                <td className="p-1 border">
                   <input
                     type="text"
                     value={medicine.discount}
@@ -127,7 +127,7 @@ export default function AddExtraMedicine({ onAddMedicine }) {
                   />
                 </td>
 
-                <td className="p-1 border-r border-text-accent/30">
+                <td className="p-1 border">
                   <input
                     type="text"
                     value={medicine.tax}
@@ -136,7 +136,7 @@ export default function AddExtraMedicine({ onAddMedicine }) {
                   />
                 </td>
 
-                <td className="p-1 border-r border-text-accent/30">
+                <td className="p-1 border">
                   <input
                     type="text"
                     value={medicine.taxAmount}
@@ -145,7 +145,7 @@ export default function AddExtraMedicine({ onAddMedicine }) {
                   />
                 </td>
 
-                <td className="p-1">
+                <td className="p-1 border">
                   <input
                     type="text"
                     value={medicine.total}
