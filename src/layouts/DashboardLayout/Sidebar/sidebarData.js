@@ -1,6 +1,14 @@
 export const DEFAULT_SIDEBAR_ITEMS = [
-  { label: 'Dashboard', path: '/dashboard', icon: 'material-symbols:dashboard-rounded' },
-  { label: 'Appointments', path: '/appointments', icon: 'material-symbols:calendar-month-rounded' },
+  {
+    label: "Dashboard",
+    path: "/dashboard",
+    icon: "material-symbols:dashboard-rounded",
+  },
+  {
+    label: "Appointments",
+    path: "/appointments",
+    icon: "material-symbols:calendar-month-rounded",
+  },
   {
     label: 'Patients',
     path: '/patients',
@@ -37,8 +45,8 @@ export const DEFAULT_SIDEBAR_ITEMS = [
 ];
 
 export const DEFAULT_PROFILE = {
-  name: 'Victoria',
-  role: 'Admin',
+  name: "Victoria",
+  role: "Admin",
   avatar:
-    'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&q=80',
+    "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&q=80",
 };

@@ -20,6 +20,7 @@ const normalizeBreadcrumbs = (pathname) => {
     const crumbs = [{ label: 'Doctors', path: '/doctors' }];
     if (segments[1]) crumbs.push({ label: segments[1] === 'add' ? 'Add Doctor' : 'Doctor Profile', path: `/doctors/${segments[1]}` });
     if (segments[2] === 'edit') crumbs.push({ label: 'Edit Doctor', path: pathname });
+    if (segments[2] === 'medicine-allocation') crumbs.push({ label: 'Medicine Allocation', path: pathname });
     return crumbs;
   }
 
