@@ -13,7 +13,7 @@ export default function PharmacyBillGeneration({ onCancel, onGenerate }) {
       <AddExtraMedicine />
 
       {/* Billing Information Section */}
-      {/* <BillingInformation onCancel={onCancel} onGenerate={onGenerate} /> */}
+      <BillingInformation onCancel={onCancel} onGenerate={onGenerate} />
     </div>
   );
 }

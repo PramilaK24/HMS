@@ -139,6 +139,20 @@ leftContent  = null,
       </div>
     );
   };
+ return (
+      <div className="flex items-center gap-1.5 whitespace-nowrap">
+        {config.dot !== false && (
+          <span
+            className={`h-1.5 w-1.5 rounded-full ${config.dotClass || ""}`}
+          />
+        )}
+
+        <span className={`text-[13px] ${config.textClass || "text-white"}`}>
+          {config.label || value}
+        </span>
+      </div>
+    );
+  };
 
   return (
     <div className="relative z-10 w-full overflow-visible rounded-xl border border-[#2A2A2A] bg-[#0A0A0A]">

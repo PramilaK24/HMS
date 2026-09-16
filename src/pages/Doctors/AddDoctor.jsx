@@ -12,7 +12,23 @@ const emptyDoctor = {
   city: '', country: '', joiningDate: '', designation: '', qualification: '', department: '',
   specialist: '', status: 'Active', shiftTiming: '', photo: '', nationalId: null, certificates: [],
   bloodGroup: '', experience: '', licenseNumber: '', boardCertifications: '', memberships: '', languages: '', awards: '', biography: '',
+  availabilityDays: '', availableFrom: '', availableTo: '', availableFrom2: '', availableTo2: '',
 };
+const availabilityDays = ['Weekdays (Mon–Fri)', 'Weekends (Sat–Sun)', 'Every day'];
+const availabilityFields = [['availableFrom', 'First session starts'], ['availableTo', 'First session ends'], ['availableFrom2', 'Second session starts'], ['availableTo2', 'Second session ends']];
+
+function validateAvailability(values) {
+  const errors = {};
+  if (!values.availabilityDays && !availabilityFields.some(([key]) => values[key])) return errors;
+  if (!availabilityDays.includes(values.availabilityDays)) errors.availabilityDays = 'Select available days.';
+  for (const [start, end] of [['availableFrom', 'availableTo'], ['availableFrom2', 'availableTo2']]) {
+    if (start === 'availableFrom2' && !values[start] && !values[end]) continue;
+    for (const key of [start, end]) if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(values[key])) errors[key] = 'Choose a valid time.';
+    if (!errors[start] && !errors[end] && values[end] <= values[start]) errors[end] = 'End time must be after start time.';
+  }
+  if (values.availableFrom2 && values.availableTo && values.availableFrom2 < values.availableTo) errors.availableFrom2 = 'Sessions must not overlap.';
+  return errors;
+}
 const professionalFields = [
   ['bloodGroup', 'Blood group'], ['experience', 'Experience (years)'], ['licenseNumber', 'License number'],
   ['boardCertifications', 'Board certifications'], ['memberships', 'Professional memberships'],
@@ -113,6 +129,7 @@ function DoctorForm({ id }) {
     if (photoPending) return;
     const cleaned = Object.fromEntries(Object.entries(values).map(([key, value]) => [key, typeof value === 'string' ? value.trim() : value]));
     const nextErrors = Object.fromEntries(['photo', 'nationalId', 'certificates'].filter((name) => errors[name]).map((name) => [name, errors[name]]));
+    Object.assign(nextErrors, validateAvailability(cleaned));
     fields.forEach(([name, label, type]) => {
       if (name !== 'age' && type !== 'file' && !cleaned[name]) nextErrors[name] = label + ' is required.';
     });
@@ -168,7 +185,7 @@ function DoctorForm({ id }) {
                 const options = [...new Set([...type, ...(values[name] ? [values[name]] : [])])];
                 return <Select key={name} label={label} name={name} required error={errors[name]} value={values[name]} onChange={(event) => change(name, event.target.value)} className={selectClass}><option value="">Select {label.toLowerCase()}</option>{options.map((option) => <option key={option}>{option}</option>)}</Select>;
               }
-              return <Input key={name} label={label} name={name} type={name === 'age' ? 'text' : type} required={name !== 'age'} readOnly={name === 'age'} maxLength={type === 'date' ? undefined : name === 'address' ? 300 : 120} error={errors[name]} value={name === 'age' ? ageFromDate(values.dateOfBirth) : values[name]} onChange={name === 'age' ? undefined : (event) => change(name, event.target.value)} placeholder={name === 'age' ? 'Calculated from date of birth' : undefined} />;
+              return <Input key={name} label={label} name={name} type={name === 'age' ? 'text' : type} required={name !== 'age'} readOnly={name === 'age'} maxLength={type === 'date' ? undefined : name === 'address' ? 300 : 120} error={errors[name]} value={name === 'age' ? ageFromDate(values.dateOfBirth) : values[name]} onChange={name === 'age' ? undefined : (event) => change(name, event.target.value)} placeholder={name === 'age' ? 'Calculated from date of birth' : undefined} className={type === 'date' ? '[color-scheme:dark]' : ''} />;
             })}
           </div>
           <fieldset className="mt-8 border-t border-white/10 pt-6">
@@ -177,6 +194,14 @@ function DoctorForm({ id }) {
               {professionalFields.map(([name, label]) => (
                 <Input key={name} label={label} name={name} type={name === 'experience' ? 'number' : 'text'} min={name === 'experience' ? 0 : undefined} max={name === 'experience' ? 80 : undefined} step={name === 'experience' ? 1 : undefined} maxLength={name === 'biography' ? 500 : 160} value={values[name]} error={errors[name]} onChange={(event) => change(name, event.target.value)} />
               ))}
+            </div>
+          </fieldset>
+          <fieldset className="mt-8 border-t border-white/10 pt-6">
+            <legend className="px-2 text-base font-medium">Availability (optional)</legend>
+            <p className="mb-5 text-sm text-white/55">Set available days and one or two sessions. Leave all fields empty if the schedule is not yet confirmed.</p>
+            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+              <Select label="Available days" value={values.availabilityDays} error={errors.availabilityDays} onChange={(event) => change('availabilityDays', event.target.value)} className={selectClass}><option value="">Not configured</option>{availabilityDays.map((day) => <option key={day}>{day}</option>)}</Select>
+              {availabilityFields.map(([name, label]) => <Input key={name} label={label} type="time" value={values[name]} error={errors[name]} onChange={(event) => change(name, event.target.value)} className="[color-scheme:dark]" />)}
             </div>
           </fieldset>
           {error && <p role="alert" className="mt-5 text-sm text-red-300">{error}</p>}
