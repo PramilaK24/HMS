@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 import Card from '../../components/Card/Card';
@@ -8,7 +8,7 @@ import Select from '../../components/Select/Select';
 import Pagination from '../../components/Pagination/Pagination';
 
 export default function Doctors() {
-  const [doctors] = useState(loadDoctors);
+  const doctors = useDoctors();
   const [params, setParams] = useSearchParams();
   const query = params.get('q') || '';
   const department = params.get('department') || '';
@@ -153,6 +153,11 @@ const sampleDoctors = profiles.map(([id, name, qualification, department, specia
   licenseNumber: `DEMO-${String(index + 1).padStart(4, '0')}`,
   languages: 'English',
   biography: 'Committed to compassionate care and clear communication with patients.',
+  availabilityDays: 'Weekdays (Mon–Fri)',
+  availableFrom: '09:00',
+  availableTo: '12:00',
+  availableFrom2: '16:00',
+  availableTo2: '19:00',
 }));
 
 const DOCTOR_STORAGE_KEY = 'hms.doctors.v1';
@@ -167,7 +172,32 @@ function getStorage() {
 
 function isDoctor(record) {
   return record && ['id', 'name', 'qualification', 'department', 'specialist', 'joiningDate', 'email', 'phone', 'status', 'photo']
-    .every((field) => typeof record[field] === 'string');
+    .every((field) => typeof record[field] === 'string')
+    && ['dateOfBirth', 'gender', 'maritalStatus', 'address', 'city', 'country', 'designation', 'shiftTiming', 'bloodGroup', 'experience', 'licenseNumber', 'boardCertifications', 'memberships', 'languages', 'awards', 'biography', 'availabilityDays', 'availableFrom', 'availableTo', 'availableFrom2', 'availableTo2']
+      .every((field) => record[field] === undefined || typeof record[field] === 'string')
+    && (record.nationalId === undefined || record.nationalId === null || isDocument(record.nationalId))
+    && (record.certificates === undefined || (Array.isArray(record.certificates) && record.certificates.every(isDocument)));
+}
+
+function isDocument(file) {
+  return file && typeof file.name === 'string' && typeof file.type === 'string' && Number.isSafeInteger(file.size) && file.size >= 0;
+}
+
+// Reuse live Doctor records on listing, profile and allocation screens.
+// oxlint-disable-next-line react/only-export-components
+export function useDoctors() {
+  const [doctors, setDoctors] = useState(loadDoctors);
+  useEffect(() => {
+    const refresh = () => setDoctors(loadDoctors());
+    const onStorage = (event) => { if (event.key === DOCTOR_STORAGE_KEY || event.key === null) refresh(); };
+    window.addEventListener('storage', onStorage);
+    window.addEventListener('focus', refresh);
+    return () => {
+      window.removeEventListener('storage', onStorage);
+      window.removeEventListener('focus', refresh);
+    };
+  }, []);
+  return doctors;
 }
 
 // Kept in the existing module file for use by the Doctor pages.
@@ -198,6 +228,14 @@ export function saveDoctors(doctors, storage = getStorage()) {
   }
   try {
     if (!storage) throw new Error('Storage unavailable');
+    const previous = storage.getItem(DOCTOR_STORAGE_KEY);
+    if (previous !== null && previous !== undefined) {
+      let records;
+      try { records = JSON.parse(previous); } catch { records = null; }
+      if (!Array.isArray(records) || !records.every(isDoctor) || new Set(records.map(({ id }) => id)).size !== records.length) {
+        return { success: false, message: 'Saved doctor data could not be read safely. Please check browser storage before saving.' };
+      }
+    }
     storage.setItem(DOCTOR_STORAGE_KEY, JSON.stringify(doctors));
     return { success: true };
   } catch {

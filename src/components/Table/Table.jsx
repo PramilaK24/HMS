@@ -5,6 +5,9 @@ const Table = ({
   data = [],
   selectable = true,
   showActions = true,
+  showControls = true,
+  caption,
+  emptyMessage = 'No records found.',
   onRowClick,
 }) => {
   const [selectedRows, setSelectedRows] = useState([]);
@@ -29,7 +32,7 @@ const Table = ({
     <div className="w-full overflow-hidden rounded-xl border border-[#2A2A2A] bg-[#0A0A0A]">
 
       {/* Top Controls */}
-      <div className="flex flex-wrap items-center justify-between gap-4 px-5 pt-6">
+      {showControls && <div className="flex flex-wrap items-center justify-between gap-4 px-5 pt-6">
 
         {/* Category */}
         <button
@@ -83,12 +86,13 @@ const Table = ({
           </button>
 
         </div>
-      </div>
+      </div>}
 
       {/* Table */}
       <div className="mt-5 w-full overflow-x-auto px-5 pb-6">
 
         <table className="w-full min-w-225 border-collapse">
+          {caption && <caption className="sr-only">{caption}</caption>}
 
           {/* Header */}
           <thead>
@@ -144,6 +148,7 @@ const Table = ({
 
           {/* Body */}
           <tbody>
+            {data.length === 0 && <tr><td colSpan={columns.length + Number(selectable) + Number(showActions)} className="px-4 py-10 text-center text-sm text-white/60">{emptyMessage}</td></tr>}
             {data.map((row, rowIndex) => (
               <tr
                 key={row.id ?? rowIndex}
