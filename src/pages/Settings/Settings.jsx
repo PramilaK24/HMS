@@ -37,7 +37,7 @@ const filters = [
 const usersProfileData = [
   {
     id: 1,
-    name: "Emily Johnson",
+    name: "Emily John",
     userId: "ID: RC19023",
     email: "emily.johnson@example.com",
     role: "Receptionist",

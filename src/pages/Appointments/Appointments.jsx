@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   APPOINTMENTS_DATA, 
   APPOINTMENT_STATS, 
@@ -10,6 +10,7 @@ import { Icon } from '@iconify/react';
 import Dropdown from '../../components/Dropdown/Dropdown';
 import DateInput from '../../components/DateInput/DateInput';
 import ConfirmModal from '../../components/ConfirmModal/ConfirmModal';
+import Pagination from '../../components/Pagination/Pagination';
 
 const Appointments = () => {
   const [activeTab, setActiveTab] = useState('All');
@@ -25,7 +26,20 @@ const Appointments = () => {
 
   const [addForm, setAddForm] = useState({ patientName: '', patientId: '', department: '', doctor: '', status: '', appointmentType: '', date: '', phone: '' });
   const [editForm, setEditForm] = useState({ patientName: '', patientId: '', department: '', doctor: '', status: '', appointmentType: '', date: '', phone: '' });
+  
+  // Filter States
   const [filterForm, setFilterForm] = useState({ patientName: '', patientId: '', department: '', doctor: '', status: '', date: '' });
+  const [appliedFilters, setAppliedFilters] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
+
+  // Reset pagination when searching
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
 
   const getStatusColor = (status) => {
     switch(status) {
@@ -39,13 +53,36 @@ const Appointments = () => {
   };
 
   const filteredAppointments = appointments.filter(apt => {
+    // 1. Tab/Timeframe matching
     const matchTime = apt.timeframe === activeTimeframe;
     const matchStatus = activeTab === 'All' ? true : apt.status === activeTab;
-    return matchTime && matchStatus;
+    
+    // 2. Applied Modal Filters matching
+    let matchApplied = true;
+    if (appliedFilters) {
+      if (appliedFilters.patientName && !apt.name.toLowerCase().includes(appliedFilters.patientName.toLowerCase())) matchApplied = false;
+      if (appliedFilters.patientId && !apt.patientId.toLowerCase().includes(appliedFilters.patientId.toLowerCase())) matchApplied = false;
+      if (appliedFilters.department && apt.department !== appliedFilters.department) matchApplied = false;
+      if (appliedFilters.doctor && apt.doctor !== appliedFilters.doctor) matchApplied = false;
+      if (appliedFilters.status && apt.status !== appliedFilters.status) matchApplied = false;
+      if (appliedFilters.date && apt.date !== appliedFilters.date) matchApplied = false;
+    }
+
+    // 3. Global Search matching
+    let matchSearch = true;
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      matchSearch = apt.name.toLowerCase().includes(query) || apt.patientId.toLowerCase().includes(query);
+    }
+
+    return matchTime && matchStatus && matchApplied && matchSearch;
   });
+
+  const paginatedAppointments = filteredAppointments.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const openEditModal = (apt) => {
     setEditForm({
+      id: apt.id,
       patientName: apt.name || '',
       patientId: apt.patientId || '',
       department: apt.department || '',
@@ -56,6 +93,23 @@ const Appointments = () => {
       phone: apt.phone || ''
     });
     setIsEditModalOpen(true);
+  };
+
+  const handleEditAppointment = () => {
+    setAppointments(appointments.map(apt => 
+      apt.id === editForm.id ? {
+        ...apt,
+        name: editForm.patientName,
+        patientId: editForm.patientId,
+        department: editForm.department,
+        doctor: editForm.doctor,
+        status: editForm.status,
+        type: editForm.appointmentType,
+        date: editForm.date,
+        phone: editForm.phone
+      } : apt
+    ));
+    setIsEditModalOpen(false);
   };
 
   const isAddFormValid = 
@@ -94,7 +148,25 @@ const Appointments = () => {
     if (itemToDelete) {
       setAppointments(appointments.filter(apt => apt.id !== itemToDelete.id));
       setItemToDelete(null);
+      // Fallback page adjustment if deleting the last item on a page
+      if (paginatedAppointments.length === 1 && currentPage > 1) {
+        setCurrentPage(currentPage - 1);
+      }
     }
+  };
+
+  const handleApplyFilter = () => {
+    setAppliedFilters(filterForm);
+    setIsFilterModalOpen(false);
+    setCurrentPage(1);
+  };
+
+  const handleClearFilter = () => {
+    const emptyFilter = { patientName: '', patientId: '', department: '', doctor: '', status: '', date: '' };
+    setFilterForm(emptyFilter);
+    setAppliedFilters(null);
+    setIsFilterModalOpen(false);
+    setCurrentPage(1);
   };
 
   return (
@@ -128,7 +200,10 @@ const Appointments = () => {
           {TABS.timeframes.map(time => (
             <button 
               key={time}
-              onClick={() => setActiveTimeframe(time)}
+              onClick={() => {
+                setActiveTimeframe(time);
+                setCurrentPage(1);
+              }}
               className={"px-6 py-2 rounded-md font-medium " + (activeTimeframe === time ? 'bg-btn-solid text-white' : 'bg-[#1a1a1a] text-gray-300 hover:bg-gray-800')}
             >
               {time}
@@ -142,12 +217,17 @@ const Appointments = () => {
             </span>
             <input 
               type="text" 
-              placeholder="Search patient name or ID" 
+              placeholder="Search patient name or ID"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="bg-transparent border border-gray-700 rounded-md pl-10 pr-10 py-2 w-72 focus:outline-none focus:border-text-accent"
             />
           </div>
-          <button onClick={() => setIsFilterModalOpen(true)} className="w-10 h-10 flex items-center justify-center rounded-md border border-gray-700 bg-transparent hover:bg-gray-800 transition">
-            <Icon icon="lucide:sliders-horizontal" className="w-5 h-5 text-gray-300" />
+          <button 
+            onClick={() => setIsFilterModalOpen(true)} 
+            className={"w-10 h-10 flex items-center justify-center rounded-md border transition " + (appliedFilters ? 'border-text-accent bg-[#025126]/30 text-text-highlight' : 'border-gray-700 bg-transparent hover:bg-gray-800 text-gray-300')}
+          >
+            <Icon icon="lucide:sliders-horizontal" className="w-5 h-5" />
           </button>
         </div>
       </div>
@@ -157,7 +237,10 @@ const Appointments = () => {
         {TABS.statuses.map(tab => (
           <button 
             key={tab}
-            onClick={() => setActiveTab(tab)}
+            onClick={() => {
+              setActiveTab(tab);
+              setCurrentPage(1);
+            }}
             className={"pb-3 px-4 text-sm font-medium transition-colors " + (activeTab === tab ? 'text-text-highlight border-b-2 border-text-highlight' : 'text-gray-400 hover:text-gray-200')}
           >
             {tab}
@@ -177,8 +260,8 @@ const Appointments = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-900">
-            {filteredAppointments.length > 0 ? (
-              filteredAppointments.map((apt) => (
+            {paginatedAppointments.length > 0 ? (
+              paginatedAppointments.map((apt) => (
                 <tr key={apt.id} className="hover:bg-[#1a1a1a] transition-colors">
                   <td className="p-4"><input type="checkbox" className="accent-text-accent" /></td>
                   <td className="p-4">{apt.name}</td>
@@ -206,27 +289,20 @@ const Appointments = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="9" className="p-8 text-center text-gray-500">No appointments found for this filter combination.</td>
+                <td colSpan="9" className="p-8 text-center text-gray-500">No appointments found.</td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
 
-      {/* Pagination */}
-      <div className="flex justify-between items-center mt-6 text-sm text-gray-400">
-        <div>
-          Page <span className="text-white font-medium">1</span> of 5 (1 to {filteredAppointments.length} from {appointments.length} Patients)
-        </div>
-        <div className="flex gap-2">
-          <button className="w-8 h-8 flex items-center justify-center rounded-full bg-[#1a1a1a] hover:bg-gray-800">
-            &lt;
-          </button>
-          <button className="w-8 h-8 flex items-center justify-center rounded-full bg-text-highlight text-black hover:bg-green-400">
-            &gt;
-          </button>
-        </div>
-      </div>
+      <Pagination 
+        page={currentPage} 
+        pageSize={pageSize} 
+        totalItems={filteredAppointments.length} 
+        onPageChange={(page) => setCurrentPage(page)} 
+        itemLabel="Patients" 
+      />
 
       {/* Add Appointment Modal */}
       {isAddModalOpen && (
@@ -361,7 +437,7 @@ const Appointments = () => {
 
             <div className="flex justify-center gap-4">
               <button onClick={() => setIsEditModalOpen(false)} className="px-8 py-2.5 rounded-md border border-gray-600 text-gray-300 hover:bg-gray-800 transition">Cancel</button>
-              <button className="px-8 py-2.5 rounded-md bg-btn-solid text-white font-medium hover:opacity-90 transition">Update</button>
+              <button onClick={handleEditAppointment} className="px-8 py-2.5 rounded-md bg-btn-solid text-white font-medium hover:opacity-90 transition">Update</button>
             </div>
           </div>
         </div>
@@ -412,8 +488,8 @@ const Appointments = () => {
             </div>
 
             <div className="flex justify-center gap-4">
-              <button onClick={() => setIsFilterModalOpen(false)} className="px-8 py-2.5 rounded-md border border-gray-600 text-gray-300 hover:bg-gray-800 transition">Cancel</button>
-              <button className="px-8 py-2.5 rounded-md bg-btn-solid text-white font-medium hover:opacity-90 transition">Apply Filter</button>
+              <button onClick={handleClearFilter} className="px-8 py-2.5 rounded-md border border-gray-600 text-gray-300 hover:bg-gray-800 transition">Clear Filters</button>
+              <button onClick={handleApplyFilter} className="px-8 py-2.5 rounded-md bg-btn-solid text-white font-medium hover:opacity-90 transition">Apply Filter</button>
             </div>
           </div>
         </div>
@@ -436,5 +512,3 @@ const Appointments = () => {
 };
 
 export default Appointments;
-
-

@@ -2,14 +2,26 @@ import React, { useMemo, useState } from "react";
 import { Icon } from "@iconify/react";
 import ClinicalServicesDropdown from "../Dropdown/ClinicalServiceDropdown";
 
-const Table = ({
+const ClinicalServicesTabel = ({
   columns = [],
   data = [],
   selectable = true,
   showActions = true,
-  showControls = true,
-  caption,
-  emptyMessage = 'No records found.',
+  searchable = true,
+  searchPlaceholder = "Search product name..",
+  showFilterButton = true,
+  showDeleteButton = true,
+
+  dropdowns = [],
+  onDropdownChange,
+leftContent  = null,
+  actions = [],
+  statusConfig = {},
+
+  // Controlled search
+  searchValue = "",
+  onSearchChange,
+
   onRowClick,
 }) => {
   const [selectedRows, setSelectedRows] = useState([]);
@@ -129,49 +141,27 @@ const Table = ({
   };
 
   return (
-    <div className="w-full overflow-hidden rounded-xl border border-[#2A2A2A] bg-[#0A0A0A]">
-
-      {/* Top Controls */}
-      {showControls && 
-      
+    <div className="relative z-10 w-full overflow-visible rounded-xl border border-[#2A2A2A] bg-[#0A0A0A]">
+      {/* =========================
+          TOP SECTION
+      ========================= */}
       <div className="flex flex-wrap items-center justify-between gap-4 px-5 pt-6">
-
-        {/* Category */}
-
-        <button
-          type="button"
-          className="
-            flex h-8 items-center gap-3
-            rounded-full
-            border border-[#3A3A3A]
-            bg-[#101010]
-            px-3
-            text-[12px]
-            text-white
-          "
-        >
-          Categories
-          <span className="text-[#4ADE80]">⌄</span>
-        </button>
-
-        {/* Search + Actions */}
-        <div className="flex items-center gap-3">
-
-          <div className="flex h-8 w-50 items-center gap-2 rounded-full bg-[#12321F] px-3">
-            <span className="text-[#4ADE80]">⌕</span>
-
-            <input
-              type="text"
-              placeholder="Search product name.."
-              className="
-                w-full
-                bg-transparent
-                text-[11px]
-                text-white
-                outline-none
-                placeholder:text-[#65A878]
-              "
+        {/* DROPDOWNS */}
+        <div className="relative z-50 flex flex-wrap items-center gap-5">
+           {leftContent }
+          {dropdowns.map((dropdown) => (
+            <ClinicalServicesDropdown
+              key={dropdown.key}
+              label={dropdown.label}
+              options={dropdown.options}
+              value={dropdown.value}
+              placeholder={dropdown.placeholder}
+              onChange={(value) => {
+                onDropdownChange?.(dropdown.key, value);
+              }}
+              className={dropdown.className || "w-34"}
             />
+          ))}
         </div>
 
         {/* SEARCH + BUTTONS */}
@@ -227,9 +217,9 @@ const Table = ({
       ========================= */}
       <div className="mt-5 w-full overflow-x-auto px-5 pb-6">
         <table className="w-full min-w-225 border-collapse">
-          {caption && <caption className="sr-only">{caption}</caption>}
-
-          {/* Header */}
+          {/* =========================
+              HEADER
+          ========================= */}
           <thead>
             <tr className="h-11 bg-[#071A10]">
               {/* CHECKBOX */}
@@ -288,114 +278,113 @@ const Table = ({
           {/* =========================
               BODY
           ========================= */}
-         <tbody>
-                   {tableData.length > 0 ? (
-                     tableData.map((row, index) => (
-                       <tr
-                         key={row.id ?? index}
-                         onClick={() => onRowClick?.(row)}
-                         className="h-13.5 cursor-pointer border-b border-[#1D1D1D] hover:bg-[#111111]"
-                       >
-                         {/* CHECKBOX */}
-                         {selectable && (
-                           <td className="px-2">
-                             <label className="relative flex h-4 w-4 cursor-pointer">
-                               <input
-                                 type="checkbox"
-                                 checked={selectedRows.includes(row.id)}
-                                 onChange={(e) => {
-                                   e.stopPropagation();
-                                   toggleRow(row.id);
-                                 }}
-                                 className="peer h-4 w-4 cursor-pointer appearance-none rounded-sm border border-[#666666] bg-transparent checked:border-[#4ADE80] checked:bg-[#4ADE80]"
-                               />
-       
-                               <Icon
-                                 icon="tabler:check"
-                                 className="pointer-events-none absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 text-[#0A0A0A] peer-checked:block"
-                                 width="16"
-                                 height="16"
-                               />
-                             </label>
-                           </td>
-                         )}
-       
-                         {/* DATA */}
-                         {columns.map((column) => (
-                           <td
-                             key={column.key}
-                             className="whitespace-nowrap px-4 font-['Helvetica'] text-[13px] text-white"
-                           >
-                             {column.render
-                               ? column.render(row[column.key], row)
-                               : column.type === "status"
-                                 ? renderStatus(row[column.key])
-                                 : row[column.key]}
-                           </td>
-                         ))}
-       
+          <tbody>
+            {tableData.length > 0 ? (
+              tableData.map((row, index) => (
+                <tr
+                  key={row.id ?? index}
+                  onClick={() => onRowClick?.(row)}
+                  className="h-13.5 cursor-pointer border-b border-[#1D1D1D] hover:bg-[#111111]"
+                >
+                  {/* CHECKBOX */}
+                  {selectable && (
+                    <td className="px-2">
+                      <label className="relative flex h-4 w-4 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={selectedRows.includes(row.id)}
+                          onChange={(e) => {
+                            e.stopPropagation();
+                            toggleRow(row.id);
+                          }}
+                          className="peer h-4 w-4 cursor-pointer appearance-none rounded-sm border border-[#666666] bg-transparent checked:border-[#4ADE80] checked:bg-[#4ADE80]"
+                        />
+
+                        <Icon
+                          icon="tabler:check"
+                          className="pointer-events-none absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 text-[#0A0A0A] peer-checked:block"
+                          width="16"
+                          height="16"
+                        />
+                      </label>
+                    </td>
+                  )}
+
+                  {/* DATA */}
+                  {columns.map((column) => (
+                    <td
+                      key={column.key}
+                      className="whitespace-nowrap px-4 font-['Helvetica'] text-[13px] text-white"
+                    >
+                      {column.render
+                        ? column.render(row[column.key], row)
+                        : column.type === "status"
+                          ? renderStatus(row[column.key])
+                          : row[column.key]}
+                    </td>
+                  ))}
+
                   {/* =========================
                       REUSABLE ACTIONS
                   ========================= */}
-                    {showActions && (
-                                    <td className="px-4">
-                                      <div className="flex items-center justify-center gap-2">
-                                        {actions.length > 0 ? (
-                                          actions.map((action, actionIndex) => (
-                                            <button
-                                              key={action.key || actionIndex}
-                                              type="button"
-                                              title={action.label}
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                action.onClick?.(row);
-                                              }}
-                                              className={
-                                                action.className ||
-                                                "flex h-7 w-7 items-center justify-center rounded-full bg-[#12321F] text-[#4ADE80] hover:bg-[#194A2C]"
-                                              }
-                                            >
-                                              <Icon
-                                                icon={action.icon}
-                                                width={action.width || 15}
-                                                height={action.height || 15}
-                                              />
-                                            </button>
-                                          ))
-                                        ) : (
-                                          <button
-                                            type="button"
-                                            onClick={(e) => e.stopPropagation()}
-                                            className="text-white hover:text-[#4ADE80]"
-                                          >
-                                            <Icon icon="tabler:dots-vertical" width="20" />
-                                          </button>
-                                        )}
-                                      </div>
-                                    </td>
-                                  )}
-                                </tr>
-                              ))
-                            ) : (
-                              <tr>
-                                <td
-                                  colSpan={
-                                    columns.length +
-                                    (selectable ? 1 : 0) +
-                                    (showActions ? 1 : 0)
-                                  }
-                                  className="py-8 text-center text-sm text-gray-500"
-                                >
-                                  No data available
-                                </td>
-                              </tr>
-                            )}
-                          </tbody>
-                        </table>
+                  {showActions && (
+                    <td className="px-4">
+                      <div className="flex items-center justify-center gap-2">
+                        {actions.length > 0 ? (
+                          actions.map((action, actionIndex) => (
+                            <button
+                              key={action.key || actionIndex}
+                              type="button"
+                              title={action.label}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                action.onClick?.(row);
+                              }}
+                              className={
+                                action.className ||
+                                "flex h-7 w-7 items-center justify-center rounded-full bg-[#12321F] text-[#4ADE80] hover:bg-[#194A2C]"
+                              }
+                            >
+                              <Icon
+                                icon={action.icon}
+                                width={action.width || 15}
+                                height={action.height || 15}
+                              />
+                            </button>
+                          ))
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={(e) => e.stopPropagation()}
+                            className="text-white hover:text-[#4ADE80]"
+                          >
+                            <Icon icon="tabler:dots-vertical" width="20" />
+                          </button>
+                        )}
                       </div>
-                    </div>}
-                    </div>
-                  );
-                };
+                    </td>
+                  )}
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td
+                  colSpan={
+                    columns.length +
+                    (selectable ? 1 : 0) +
+                    (showActions ? 1 : 0)
+                  }
+                  className="py-8 text-center text-sm text-gray-500"
+                >
+                  No data available
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
 
-export default Table;
+export default ClinicalServicesTabel;

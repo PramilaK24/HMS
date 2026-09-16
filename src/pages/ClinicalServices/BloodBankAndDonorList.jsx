@@ -1,7 +1,6 @@
 import { Icon } from "@iconify/react";
 import { useMemo, useState } from "react";
 import Pagination from "../../components/Pagination/Pagination";
-import Table from "../../components/Table/Table";
 import {
   bloodColumns,
   bloodBank_Data,
@@ -9,6 +8,7 @@ import {
   bloodTypesOptions,
   statusOptions,
 } from "../../constants/clinicalServices";
+import ClinicalServicesTabel from "../../components/Table/ClinicalServicesTabel";
 
 const BloodBankAndDonorList = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -93,7 +93,7 @@ const BloodBankAndDonorList = () => {
           </div>
           </div>
 
-          <Table
+          <ClinicalServicesTabel
             columns={bloodColumns}
             data={displayData}
             selectable={true}
@@ -156,7 +156,7 @@ const BloodBankAndDonorList = () => {
           </div>
         </div>
 
-          <Table
+          <ClinicalServicesTabel
             columns={bloodColumns}
             data={displayData}
             selectable={true}

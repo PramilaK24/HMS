@@ -1,7 +1,6 @@
 import { Icon } from "@iconify/react";
 import { useMemo, useState } from "react";
-import Pagination from "../../components/Pagination/Pagination";
-import Table from "../../components/Table/Table";
+import Pagination from "../../components/Pagination/Pagination";  
 import {
   departmentOptions,
   LabAndRadiology_DATA,
@@ -10,6 +9,7 @@ import {
   monthOptions,
   yearOptions,
 } from "../../constants/clinicalServices";
+import ClinicalServicesTabel from "../../components/Table/ClinicalServicesTabel";
 
 const LaboratoryAndRadiology = () => {
   const [department, setDepartment] = useState("all");
@@ -209,7 +209,7 @@ const LaboratoryAndRadiology = () => {
           </p>
         </div>
 
-        <Table
+        <ClinicalServicesTabel
           columns={labColumns}
           data={displayData}
           selectable={true}
