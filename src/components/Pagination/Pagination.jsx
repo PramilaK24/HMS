@@ -17,7 +17,7 @@ export default function Pagination({
   const end = Math.min(currentPage * pageSize, totalItems);
 
   return (
-    <div className="mt-6 flex items-center gap-6  w-full">
+    <div className="mt-6 flex w-full flex-wrap items-center gap-x-6 gap-y-3">
       {/* Pagination Text */}
       <p
         role="status"
@@ -30,7 +30,7 @@ export default function Pagination({
       {/* Pagination Buttons */}
       <nav
         aria-label={`${itemLabel} pagination`}
-        className="flex items-center gap-4"
+        className="flex shrink-0 items-center gap-4"
       >
         {/* Previous */}
         <Button
