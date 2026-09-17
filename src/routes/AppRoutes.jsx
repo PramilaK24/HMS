@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import DashboardLayout from '../layouts/DashboardLayout/DashboardLayout';
 import AuthLayout from '../layouts/AuthLayout/AuthLayout';
 import Login from '../pages/Login/Login';
@@ -53,7 +53,9 @@ const AppRoutes = () => {
         <Route path="/doctor-nurse/doctor" element={<Doctors />} />
         <Route path="/doctor-nurse/doctor/add" element={<AddDoctor />} />
         <Route path="/doctor-nurse/doctor/:id/edit" element={<AddDoctor />} />
+        <Route path="/doctor-nurse/doctor/:id/medicine-allocation" element={<DoctorDetails allocation />} />
         <Route path="/doctor-nurse/doctor/:id" element={<DoctorDetails />} />
+        <Route path="/doctors/*" element={<LegacyDoctorRedirect />} />
         
         <Route path="/clinical-services/ambulance-management" element={<AmbulanceManagement />} />
         <Route path="/clinical-services/clinical-reports" element={<ClinicalReports />} />
@@ -79,3 +81,9 @@ const AppRoutes = () => {
 };
 
 export default AppRoutes;
+
+// Keep previously shared Doctor links working after the sidebar route change.
+function LegacyDoctorRedirect() {
+  const { pathname, search, hash, state } = useLocation();
+  return <Navigate to={{ pathname: pathname.replace(/^\/doctors(?=\/|$)/, '/doctor-nurse/doctor'), search, hash }} state={state} replace />;
+}
