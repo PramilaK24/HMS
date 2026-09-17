@@ -5,14 +5,30 @@ import InsuranceClaims from './InsuranceClaims';
 import ValidationControl from './ValidationControl';
 import Invoices from './Invoices';
 import PharmacyBillGeneration from './PharmacyBillGeneration';
+import PatientBillGeneration from './PatientBillGeneration';
+import { PATIENT_PROFILES } from '../../constants/billingConstants';
 
 export default function Billing() {
-  const [currentView, setCurrentView] = useState('list'); // 'list' | 'generate'
+  const [currentView, setCurrentView] = useState('list'); // 'list' | 'generate' | 'patientBill'
+  const [patientData, setPatientData] = useState(PATIENT_PROFILES['Jeo Darlington']);
 
   if (currentView === 'generate') {
     return (
       <PharmacyBillGeneration
+        patientData={patientData}
+        setPatientData={setPatientData}
         onCancel={() => setCurrentView('list')}
+        onGenerate={() => setCurrentView('patientBill')}
+      />
+    );
+  }
+
+  if (currentView === 'patientBill') {
+    return (
+      <PatientBillGeneration
+        patientData={patientData}
+        setPatientData={setPatientData}
+        onCancel={() => setCurrentView('generate')}
         onGenerate={() => setCurrentView('list')}
       />
     );
