@@ -10,69 +10,38 @@ export const DEFAULT_SIDEBAR_ITEMS = [
     icon: "material-symbols:calendar-month-rounded",
   },
   {
-    label: "Patients",
-    path: "/patients",
-    icon: "material-symbols:groups-rounded",
+    label: 'Patients',
+    path: '/patients',
+    icon: 'material-symbols:groups-rounded',  
     children: [
-      {
-        label: "Patient List",
-        path: "/patients/NewRegistration",
-        icon: "material-symbols:group-rounded",
-      },
-      {
-        label: "Add Patient",
-        path: "/patients/add",
-        icon: "material-symbols:person-add-rounded",
-      },
-      {
-        label: "Patient Details",
-        path: "/patients/123",
-        icon: "material-symbols:info-outline-rounded",
-      },
+      { label: 'New Registration', path: '/patients/newRegistration', icon: 'material-symbols:person-add-rounded' },
+      { label: 'IPD/OPD Patient', path: '/patients/IPD-OPD-Patient', icon: 'material-symbols:group-rounded' },
+      { label: 'Patients Profile', path: '/patients/patientsProfile', icon: 'akar-icons:person' },
     ],
   },
-  {
-    label: "Doctors",
-    path: "/doctors",
-    icon: "material-symbols:medical-services-rounded",
-  },
-  {
-    label: "Clinical Services",
-    icon: "material-symbols:groups-rounded",
-    children: [
-      {
-        label: "LaboratoryAndRadiology",
-        path: "/laboratory-radiology",
-        icon: "material-symbols:group-rounded",
-      },
-      {
-        label: "Ambulance Management",
-        path: "/ambulance-management",
-        icon: "material-symbols:person-add-rounded",
-      },
-      {
-        label: "BloodBankAndDonorList",
-        path: "/blood-and-donor",
-        icon: "material-symbols:info-outline-rounded",
-      },
+  { label: 'Administration', path: '/administration', icon: 'bi:hospital',
+     children: [
+      { label: 'Departments', path: '/administration/departments', icon: 'carbon:list' },
+      { label: 'Room Management', path: '/administration/roomManagement', icon: 'arcticons:emoji-bed' },
+      { label: 'Staff Management', path: '/administration/staffManagement', icon: 'akar-icons:person' },
     ],
-  },
-  {
-    label: "Billing",
-    path: "/billing",
-    icon: "material-symbols:receipt-long-rounded",
-  },
-  {
-    label: "Inventory",
-    path: "/inventory",
-    icon: "material-symbols:inventory-2-rounded",
-  },
-  { label: "Staff", path: "/staff", icon: "material-symbols:badge-rounded" },
-  {
-    label: "Settings",
-    path: "/settings",
-    icon: "material-symbols:settings-rounded",
-  },
+   },   
+  { label: 'Stock & Inventory', path: '/stock-inventory', icon: 'fluent-mdl2:product-catalog' },
+  { label: 'Doctor/Nurse', path: '/doctor-nurse', icon: 'carbon:add-large',
+     children: [
+      { label: 'Doctor', path: '/doctor-nurse/doctor', icon: 'hugeicons:doctor-01' },
+      { label: 'Nurse', path: '/doctor-nurse/nurse', icon: 'healthicons:nurse-outline' },
+    ],
+   },
+  { label: 'Clinical Services', path: '/clinical-services', icon: 'healthicons:virus-lab-research-syringe',
+    children: [
+      { label: 'Laboratory & Radiology', path: '/clinical-services/laboratory-radiology', icon: 'healthicons:virus-lab-research-test-tube-outline' },
+      { label: 'Clinical Reports', path: '/clinical-services/clinical-reports', icon: 'material-symbols:person-add-rounded' },
+      { label: 'Ambulance Management', path: '/clinical-services/ambulance-management', icon: 'boxicons:ambulance' },
+    ],
+   },
+  { label: 'Billing', path: '/billing', icon: 'bi:clipboard2-check' },
+  { label: 'Settings', path: '/settings', icon: 'akar-icons:person' },
 ];
 
 export const DEFAULT_PROFILE = {
