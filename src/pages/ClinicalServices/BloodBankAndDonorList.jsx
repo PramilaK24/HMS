@@ -1,4 +1,3 @@
-import { Icon } from "@iconify/react";
 import { useMemo, useState } from "react";
 import Pagination from "../../components/Pagination/Pagination";
 import {
@@ -86,53 +85,46 @@ const BloodBankAndDonorList = () => {
           <div>
             <button
               onClick={() => setIsAddModalOpen(true)}
-              className="btn btn-gradient flex items-center gap-2"
-            >
+              className=" w-50 h-10 px-1 py-1 rounded-lg flex items-center justify-center
+              gap-2 border-b border-text-highlight bg-[linear-gradient(92.18deg,#025126_3.26%,#0D7F41_50.54%,#025126_97.83%)]
+              shadow-[0px_2px_12px_0px_#00000040] cursor-pointer " >
               <span>+</span> Add blood group
             </button>
           </div>
-          </div>
+        </div>
 
-          <ClinicalServicesTabel
-            columns={bloodColumns}
-            data={displayData}
-            selectable={true}
-            showActions={true}
-            searchable={true}
-            /* Controlled search */
-            searchValue={search}
-            onSearchChange={handleSearchChange}
-            searchPlaceholder="Search product name.."
-            showFilterButton={true}
-            showDeleteButton={true}
-            statusConfig={bloodStatusConfig}
-            dropdowns={[
-              {
-                key: "bloodTypes",
-                value: bloodTypes,
-                options: bloodTypesOptions.filter((item) => item !== "all"),
-                placeholder: "Blood type",
-              },
-              {
-                key: "status",
-                value: status,
-                options: statusOptions.filter((item) => item !== "all"),
-                placeholder: "Status",
-              },
-            ]}
-            onDropdownChange={handleDropdownChange}
-            onRowClick={(row) => {
-              console.log("Selected row:", row);
-            }}
-          />
-          <Pagination
-            page={page}
-            pageSize={effectivePageSize}
-            totalItems={filteredData.length}
-            onPageChange={setPage}
-            itemLabel="rooms"
-          />
-        
+        <ClinicalServicesTabel
+          columns={bloodColumns}
+          data={displayData}
+          selectable={true}
+          showActions={true}
+          searchable={true}
+          /* Controlled search */
+          searchValue={search}
+          onSearchChange={handleSearchChange}
+          searchPlaceholder="Search product name.."
+          showFilterButton={true}
+          showDeleteButton={true}
+          statusConfig={bloodStatusConfig}
+          dropdowns={[
+            {
+              key: "bloodTypes",
+              value: bloodTypes,
+              options: bloodTypesOptions.filter((item) => item !== "all"),
+              placeholder: "Blood type",
+            },
+            {
+              key: "status",
+              value: status,
+              options: statusOptions.filter((item) => item !== "all"),
+              placeholder: "Status",
+            },
+          ]}
+          onDropdownChange={handleDropdownChange}
+          onRowClick={(row) => {
+            console.log("Selected row:", row);
+          }}
+        />
       </div>
       <br />
       <div className="box-border w-full min-h-full rounded-xl px-4 py-6 bg-[linear-gradient(180deg,#091810_0%,#0A0A0A_40%)]">
@@ -149,52 +141,53 @@ const BloodBankAndDonorList = () => {
           <div>
             <button
               onClick={() => setIsAddModalOpen(true)}
-              className="btn btn-gradient flex items-center gap-2"
-            >
+              className=" w-50 h-10 px-1 py-1 rounded-lg flex items-center justify-center
+              gap-2 border-b border-text-highlight bg-[linear-gradient(92.18deg,#025126_3.26%,#0D7F41_50.54%,#025126_97.83%)]
+              shadow-[0px_2px_12px_0px_#00000040] cursor-pointer " >
               <span>+</span> Add donor
             </button>
           </div>
         </div>
 
-          <ClinicalServicesTabel
-            columns={bloodColumns}
-            data={displayData}
-            selectable={true}
-            showActions={true}
-            searchable={true}
-            /* Controlled search */
-            searchValue={search}
-            onSearchChange={handleSearchChange}
-            searchPlaceholder="Search product name.."
-            showFilterButton={true}
-            showDeleteButton={true}
-            statusConfig={bloodStatusConfig}
-            dropdowns={[
-              {
-                key: "bloodTypes",
-                value: bloodTypes,
-                options: bloodTypesOptions.filter((item) => item !== "all"),
-                placeholder: "Blood type",
-              },
-              {
-                key: "status",
-                value: status,
-                options: statusOptions.filter((item) => item !== "all"),
-                placeholder: "Status",
-              },
-            ]}
-            onDropdownChange={handleDropdownChange}
-            onRowClick={(row) => {
-              console.log("Selected row:", row);
-            }}
-          />
-          <Pagination
-            page={page}
-            pageSize={effectivePageSize}
-            totalItems={filteredData.length}
-            onPageChange={setPage}
-            itemLabel="rooms"
-          />
+        <ClinicalServicesTabel
+          columns={bloodColumns}
+          data={displayData}
+          selectable={true}
+          showActions={true}
+          searchable={true}
+          /* Controlled search */
+          searchValue={search}
+          onSearchChange={handleSearchChange}
+          searchPlaceholder="Search product name.."
+          showFilterButton={true}
+          showDeleteButton={true}
+          statusConfig={bloodStatusConfig}
+          dropdowns={[
+            {
+              key: "bloodTypes",
+              value: bloodTypes,
+              options: bloodTypesOptions.filter((item) => item !== "all"),
+              placeholder: "Blood type",
+            },
+            {
+              key: "status",
+              value: status,
+              options: statusOptions.filter((item) => item !== "all"),
+              placeholder: "Gender",
+            },
+          ]}
+          onDropdownChange={handleDropdownChange}
+          onRowClick={(row) => {
+            console.log("Selected row:", row);
+          }}
+        />
+        <Pagination
+          page={page}
+          pageSize={effectivePageSize}
+          totalItems={filteredData.length}
+          onPageChange={setPage}
+          itemLabel="rooms"
+        />
       </div>
     </div>
   );

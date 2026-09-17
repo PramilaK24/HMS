@@ -14,7 +14,7 @@ const ClinicalServicesTabel = ({
 
   dropdowns = [],
   onDropdownChange,
-leftContent  = null,
+  leftContent = null,
   actions = [],
   statusConfig = {},
 
@@ -148,7 +148,7 @@ leftContent  = null,
       <div className="flex flex-wrap items-center justify-between gap-4 px-5 pt-6">
         {/* DROPDOWNS */}
         <div className="relative z-50 flex flex-wrap items-center gap-5">
-           {leftContent }
+          {leftContent}
           {dropdowns.map((dropdown) => (
             <ClinicalServicesDropdown
               key={dropdown.key}
@@ -316,11 +316,29 @@ leftContent  = null,
                       key={column.key}
                       className="whitespace-nowrap px-4 font-['Helvetica'] text-[13px] text-white"
                     >
-                      {column.render
-                        ? column.render(row[column.key], row)
-                        : column.type === "status"
-                          ? renderStatus(row[column.key])
-                          : row[column.key]}
+                      {column.renderType === "orderId" ? (
+                        <div className="flex flex-col">
+                          <span className="text-[13px] text-white">
+                            {row[column.key]}
+                          </span>
+                          <span className="text-[12px] text-[#999999]">
+                            {row.time}
+                          </span>
+                        </div>
+                      ) : column.renderType === "patientName" ? (
+                        <div className="flex flex-col">
+                          <span className="text-[13px] text-white">
+                            {row[column.key]}
+                          </span>
+                          <span className="text-[12px] text-[#999999]">
+                            {row.patientId}
+                          </span>
+                        </div>
+                      ) : column.type === "status" ? (
+                        renderStatus(row[column.key])
+                      ) : (
+                        row[column.key]
+                      )}
                     </td>
                   ))}
 
