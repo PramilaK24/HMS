@@ -5,7 +5,7 @@ import Button from '../../components/Button/Button';
 import Card from '../../components/Card/Card';
 import Input from '../../components/Input/Input';
 import Select from '../../components/Select/Select';
-import { loadDoctors, saveDoctors } from './Doctors';
+import { loadDoctors, saveDoctors, DOCTOR_DEPARTMENTS, DOCTOR_SPECIALISTS } from './Doctors';
 
 const emptyDoctor = {
   name: '', dateOfBirth: '', gender: '', maritalStatus: '', address: '', phone: '', email: '',
@@ -14,27 +14,6 @@ const emptyDoctor = {
   bloodGroup: '', experience: '', licenseNumber: '', boardCertifications: '', memberships: '', languages: '', awards: '', biography: '',
   availabilityDays: '', availableFrom: '', availableTo: '', availableFrom2: '', availableTo2: '',
 };
-const availabilityDays = ['Weekdays (Mon–Fri)', 'Weekends (Sat–Sun)', 'Every day'];
-const availabilityFields = [['availableFrom', 'First session starts'], ['availableTo', 'First session ends'], ['availableFrom2', 'Second session starts'], ['availableTo2', 'Second session ends']];
-
-function validateAvailability(values) {
-  const errors = {};
-  if (!values.availabilityDays && !availabilityFields.some(([key]) => values[key])) return errors;
-  if (!availabilityDays.includes(values.availabilityDays)) errors.availabilityDays = 'Select available days.';
-  for (const [start, end] of [['availableFrom', 'availableTo'], ['availableFrom2', 'availableTo2']]) {
-    if (start === 'availableFrom2' && !values[start] && !values[end]) continue;
-    for (const key of [start, end]) if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(values[key])) errors[key] = 'Choose a valid time.';
-    if (!errors[start] && !errors[end] && values[end] <= values[start]) errors[end] = 'End time must be after start time.';
-  }
-  if (values.availableFrom2 && values.availableTo && values.availableFrom2 < values.availableTo) errors.availableFrom2 = 'Sessions must not overlap.';
-  return errors;
-}
-const professionalFields = [
-  ['bloodGroup', 'Blood group'], ['experience', 'Experience (years)'], ['licenseNumber', 'License number'],
-  ['boardCertifications', 'Board certifications'], ['memberships', 'Professional memberships'],
-  ['languages', 'Languages spoken'], ['awards', 'Awards & recognitions'], ['biography', 'About the doctor'],
-];
-const departments = ['Cardiology', 'Anesthesiology', 'Dermatology', 'Gastroenterology', 'Gynaecology', 'Orthopaedics', 'Neurology', 'Paediatrics', 'General Surgery', 'Urology'];
 const selectClass = 'w-full rounded-md border border-white/20 bg-bg-dark px-3 py-2.5 text-sm text-white focus:outline-2 focus:outline-text-highlight';
 const fields = [
   ['name', 'Full name'], ['dateOfBirth', 'Date of birth', 'date'],
@@ -44,10 +23,10 @@ const fields = [
   ['nationalId', 'National ID', 'file'], ['city', 'City'], ['country', 'Country'],
   ['joiningDate', 'Date of joining', 'date'],
   ['designation', 'Designation', ['Doctor', 'Consultant', 'Senior Consultant', 'Resident', 'Head of Department']],
-  ['department', 'Department', departments], ['specialist', 'Specialist'],
-  ['status', 'Status', ['Active', 'Inactive', 'On leave']],
+  ['department', 'Department', DOCTOR_DEPARTMENTS], ['specialist', 'Specialist', DOCTOR_SPECIALISTS],
+  ['status', 'Status', ['Active', 'Inactive', 'Pending']],
   ['shiftTiming', 'Shift timing', ['Morning', 'Afternoon', 'Evening', 'Night', 'Rotational']],
-  ['certificates', 'Certificates', 'file'], ['qualification', 'Qualification'],
+  ['certificates', 'Certificates', 'file'],
 ];
 
 function ageFromDate(value) {
@@ -129,7 +108,6 @@ function DoctorForm({ id }) {
     if (photoPending) return;
     const cleaned = Object.fromEntries(Object.entries(values).map(([key, value]) => [key, typeof value === 'string' ? value.trim() : value]));
     const nextErrors = Object.fromEntries(['photo', 'nationalId', 'certificates'].filter((name) => errors[name]).map((name) => [name, errors[name]]));
-    Object.assign(nextErrors, validateAvailability(cleaned));
     fields.forEach(([name, label, type]) => {
       if (name !== 'age' && type !== 'file' && !cleaned[name]) nextErrors[name] = label + ' is required.';
     });
@@ -138,7 +116,6 @@ function DoctorForm({ id }) {
     const age = ageFromDate(cleaned.dateOfBirth);
     if (cleaned.dateOfBirth && (age === '' || age < 18 || age > 100)) nextErrors.dateOfBirth = 'Enter a date of birth for an adult aged 18–100.';
     if (cleaned.joiningDate && cleaned.dateOfBirth && cleaned.joiningDate < cleaned.dateOfBirth) nextErrors.joiningDate = 'Joining date must be after the date of birth.';
-    if (cleaned.experience && (!/^\d{1,2}$/.test(cleaned.experience) || Number(cleaned.experience) > 80 || (age !== '' && Number(cleaned.experience) > age - 18))) nextErrors.experience = 'Enter valid experience in whole years, consistent with the date of birth.';
     const current = loadDoctors();
     if (current.some((doctor) => doctor.id !== id && doctor.email.toLowerCase() === cleaned.email.toLowerCase())) nextErrors.email = 'A doctor with this email already exists.';
     setErrors(nextErrors);
@@ -163,13 +140,13 @@ function DoctorForm({ id }) {
       {id && !original ? <Card><h1 className="text-xl">Doctor not found</h1><p className="mt-2 text-white/60">Choose an existing doctor from the list.</p></Card> : (
         <form ref={formRef} onSubmit={handleSubmit} noValidate>
           <div className="mb-8 flex flex-wrap items-start justify-between gap-6">
-            <div><h1 className="text-xl font-medium">{id ? 'Edit Doctor' : 'Add Doctor'}</h1><p className="mt-2 text-sm text-white/55">Fields marked * are required. Photo and documents are optional.</p></div>
-            <div className="max-w-64">
-              <label className="relative flex size-28 cursor-pointer items-center justify-center overflow-hidden rounded-lg border border-dashed border-white/40 bg-white/5 focus-within:outline-2 focus-within:outline-text-highlight">
+            <div className="min-w-0 flex-1"><h1 className="text-xl font-medium">{id ? 'Edit Doctor' : 'Add Doctor'}</h1><p className="mt-2 text-sm text-white/55">Fields marked * are required.</p></div>
+            <div className="w-28 shrink-0">
+              <label className="relative flex size-28 cursor-pointer items-center justify-center overflow-hidden rounded-lg border border-dashed border-text-accent/70 bg-[#0d281a] focus-within:outline-2 focus-within:outline-text-highlight">
                 {values.photo ? <img src={values.photo} alt="Doctor preview" className="size-full object-cover" /> : <span className="flex flex-col items-center gap-2 text-sm text-white/60"><Icon icon="solar:camera-add-linear" width="28" /> Add photo</span>}
                 <input type="file" aria-label="Doctor photo" aria-invalid={!!errors.photo} aria-describedby="doctor-photo-help" accept="image/jpeg,image/png,image/webp" onChange={selectPhoto} className="absolute inset-0 size-full cursor-pointer opacity-0" />
               </label>
-              <p id="doctor-photo-help" className="mt-2 text-xs text-white/55">JPG, PNG or WebP · Maximum 512 KB</p>
+              <p id="doctor-photo-help" className="sr-only">JPG, PNG or WebP · Maximum 512 KB</p>
               {photoPending && <p role="status" className="mt-2 text-xs">Preparing photo…</p>}
               {errors.photo && <p role="alert" className="mt-2 text-xs text-red-300">{errors.photo}</p>}
               {(values.photo || errors.photo) && <Button onClick={() => { photoRequest.current++; setPhotoPending(false); change('photo', ''); }} className="mt-2 text-xs text-text-highlight">Remove photo</Button>}
@@ -188,22 +165,6 @@ function DoctorForm({ id }) {
               return <Input key={name} label={label} name={name} type={name === 'age' ? 'text' : type} required={name !== 'age'} readOnly={name === 'age'} maxLength={type === 'date' ? undefined : name === 'address' ? 300 : 120} error={errors[name]} value={name === 'age' ? ageFromDate(values.dateOfBirth) : values[name]} onChange={name === 'age' ? undefined : (event) => change(name, event.target.value)} placeholder={name === 'age' ? 'Calculated from date of birth' : undefined} className={type === 'date' ? '[color-scheme:dark]' : ''} />;
             })}
           </div>
-          <fieldset className="mt-8 border-t border-white/10 pt-6">
-            <legend className="px-2 text-base font-medium">Professional profile (optional)</legend>
-            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-              {professionalFields.map(([name, label]) => (
-                <Input key={name} label={label} name={name} type={name === 'experience' ? 'number' : 'text'} min={name === 'experience' ? 0 : undefined} max={name === 'experience' ? 80 : undefined} step={name === 'experience' ? 1 : undefined} maxLength={name === 'biography' ? 500 : 160} value={values[name]} error={errors[name]} onChange={(event) => change(name, event.target.value)} />
-              ))}
-            </div>
-          </fieldset>
-          <fieldset className="mt-8 border-t border-white/10 pt-6">
-            <legend className="px-2 text-base font-medium">Availability (optional)</legend>
-            <p className="mb-5 text-sm text-white/55">Set available days and one or two sessions. Leave all fields empty if the schedule is not yet confirmed.</p>
-            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-              <Select label="Available days" value={values.availabilityDays} error={errors.availabilityDays} onChange={(event) => change('availabilityDays', event.target.value)} className={selectClass}><option value="">Not configured</option>{availabilityDays.map((day) => <option key={day}>{day}</option>)}</Select>
-              {availabilityFields.map(([name, label]) => <Input key={name} label={label} type="time" value={values[name]} error={errors[name]} onChange={(event) => change(name, event.target.value)} className="[color-scheme:dark]" />)}
-            </div>
-          </fieldset>
           {error && <p role="alert" className="mt-5 text-sm text-red-300">{error}</p>}
           <div className="mt-8 flex flex-wrap justify-end gap-3">
             <Button onClick={() => { photoRequest.current++; setPhotoPending(false); setValues({ ...emptyDoctor, ...original }); setErrors({}); setError(''); }} className="border border-white/20 px-5 py-2 text-sm">{id ? 'Reset changes' : 'Clear'}</Button>

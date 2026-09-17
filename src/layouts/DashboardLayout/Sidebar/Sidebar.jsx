@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState, useSyncExternalStore } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { Avatar, Button, Collapse, Divider, IconButton } from '@mui/material';
 import { Icon } from '@iconify/react';
@@ -9,6 +9,14 @@ const itemMatchesPath = (itemPath, currentPath) => {
   return currentPath === itemPath || currentPath.startsWith(`${itemPath}/`);
 };
 
+const mobileQuery = '(max-width: 767px)';
+const subscribeToViewport = (notify) => {
+  const media = window.matchMedia(mobileQuery);
+  media.addEventListener('change', notify);
+  return () => media.removeEventListener('change', notify);
+};
+const getMobileSnapshot = () => window.matchMedia(mobileQuery).matches;
+
 const Sidebar = ({
   items = [],
   profile = null,
@@ -16,7 +24,10 @@ const Sidebar = ({
   onLogout,
 }) => {
   const location = useLocation();
-  const [collapsed, setCollapsed] = useState(false);
+  const [desktopCollapsed, setDesktopCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const isMobile = useSyncExternalStore(subscribeToViewport, getMobileSnapshot, () => false);
+  const collapsed = isMobile ? !mobileOpen : desktopCollapsed;
   const [expandedMap, setExpandedMap] = useState({});
 
   const sidebarItems = useMemo(() => items || [], [items]);
@@ -28,24 +39,7 @@ const Sidebar = ({
       'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&q=80',
   };
 
-  useEffect(() => {
-    const nextExpanded = { ...expandedMap };
-
-    const markParents = (list) => {
-      list.forEach((item) => {
-        const hasActiveChild = item.children?.some((child) => itemMatchesPath(child.path, location.pathname));
-
-        if (hasActiveChild) {
-          nextExpanded[item.path] = true;
-        }
-      });
-    };
-
-    markParents(sidebarItems);
-    setExpandedMap(nextExpanded);
-  }, [location.pathname, sidebarItems]);
-
-  const handleToggle = () => setCollapsed((prev) => !prev);
+  const handleToggle = () => isMobile ? setMobileOpen((open) => !open) : setDesktopCollapsed((value) => !value);
 
   const toggleItem = (path) => {
     setExpandedMap((prev) => ({
@@ -57,7 +51,7 @@ const Sidebar = ({
   const renderNavItem = (item, level = 0) => {
     const hasChildren = Array.isArray(item.children) && item.children.length > 0;
     const isActive = itemMatchesPath(item.path, location.pathname);
-    const isExpanded = Boolean(expandedMap[item.path] || isActive);
+    const isExpanded = expandedMap[item.path] ?? isActive;
 
     const itemContent = (
       <>
@@ -78,9 +72,11 @@ const Sidebar = ({
         <li key={item.path || item.label} className="list-none" style={{ paddingLeft: level * 10 }}>
           <NavLink
             to={item.path}
-            end
-            className={({ isCurrent }) => `flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm transition-all duration-200 ${
-              isCurrent || isActive ? 'bg-[#0EFF7B1F] text-[#0EFF7B] shadow-[inset_0_0_0_1px_rgba(14,255,123,0.1)]' : 'text-white/75 hover:bg-white/5 hover:text-white'
+            aria-label={item.label}
+            title={collapsed ? item.label : undefined}
+            onClick={() => setMobileOpen(false)}
+            className={() => `flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm transition-all duration-200 ${
+              isActive ? 'bg-[#0EFF7B1F] text-[#0EFF7B] shadow-[inset_0_0_0_1px_rgba(14,255,123,0.1)]' : 'text-white/75 hover:bg-white/5 hover:text-white'
             } ${collapsed ? 'justify-center px-2' : ''}`}
           >
             {itemContent}
@@ -96,7 +92,10 @@ const Sidebar = ({
           className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm transition-all duration-200 ${
             isActive ? 'bg-[#0EFF7B1F] text-[#0EFF7B] shadow-[inset_0_0_0_1px_rgba(14,255,123,0.1)]' : 'text-white/75 hover:bg-white/5 hover:text-white'
           } ${collapsed ? 'justify-center px-2' : ''}`}
-          onClick={() => toggleItem(item.path)}
+          aria-label={item.label}
+          aria-expanded={isExpanded}
+          title={collapsed ? item.label : undefined}
+          onClick={() => { if (isMobile && collapsed) setMobileOpen(true); toggleItem(item.path); }}
         >
           {itemContent}
         </button>
@@ -111,7 +110,9 @@ const Sidebar = ({
   };
 
   return (
-    <aside className={`flex h-screen min-h-0 shrink-0 flex-col border-r border-[#0EFF7B1F] bg-[#05150f]/95 py-4 transition-all duration-200 ${collapsed ? 'w-20' : 'w-[260px]'}`}>
+    <>
+      {isMobile && mobileOpen && <button type="button" aria-label="Close navigation" onClick={() => setMobileOpen(false)} className="fixed inset-0 z-40 bg-black/60" />}
+    <aside className={`flex h-screen min-h-0 shrink-0 flex-col border-r border-[#0EFF7B1F] bg-[#05150f]/95 py-4 transition-all duration-200 ${isMobile && mobileOpen ? 'fixed left-0 top-0 z-50 w-[260px]' : collapsed ? 'w-20' : 'w-[260px]'}`}>
       <div className="px-3 pb-4">
         <div className="flex items-center gap-3 rounded-xl border border-[#0EFF7B1F] bg-[#0B120F]/70 px-2 py-2.5">
           <IconButton
@@ -152,6 +153,7 @@ const Sidebar = ({
         <Button
           className="!mt-3 !flex !w-full !items-center !justify-center !rounded-xl !border !border-[#0EFF7B1F] !bg-[#0EFF7B14] !px-3 !py-2.5 !text-sm !font-medium !normal-case !text-[#0EFF7B] hover:!bg-[#0EFF7B24]"
           type="button"
+          aria-label="Logout"
           onClick={onLogout}
           fullWidth
           startIcon={<Icon icon="material-symbols:logout-rounded" />}
@@ -160,6 +162,7 @@ const Sidebar = ({
         </Button>
       </div>
     </aside>
+    </>
   );
 };
 
