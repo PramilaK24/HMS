@@ -74,7 +74,7 @@ function DoctorForm({ id }) {
   const [photoPending, setPhotoPending] = useState(false);
   const photoRequest = useRef(0);
   const formRef = useRef(null);
-  const returnTo = location.state?.returnTo?.match(/^\/doctors(?:\?|$)/) ? location.state.returnTo : '/doctors';
+  const returnTo = location.state?.returnTo?.match(/^\/doctor-nurse\/doctor(?:\?|$)/) ? location.state.returnTo : '/doctor-nurse/doctor';
 
   function change(name, value) {
     setValues((current) => ({ ...current, [name]: value }));
@@ -154,7 +154,7 @@ function DoctorForm({ id }) {
     const doctor = { ...cleaned, id: id || crypto.randomUUID() };
     const result = saveDoctors(id ? current.map((record) => record.id === id ? doctor : record) : [...current, doctor]);
     if (!result.success) { setError(result.message); return; }
-    navigate('/doctors/' + doctor.id, { replace: true, state: { returnTo, saved: true } });
+    navigate('/doctor-nurse/doctor/' + doctor.id, { replace: true, state: { returnTo, saved: true } });
   }
 
   return (
