@@ -1,25 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { motion } from "framer-motion";
 import { Icon } from "@iconify/react";
-
-const Checkbox = ({ checked, onChange }) => (
-  <label className="relative flex h-4 w-4 cursor-pointer items-center justify-center">
-    <input
-      type="checkbox"
-      checked={checked}
-      onChange={onChange}
-      className="peer sr-only"
-    />
-    <span className="flex h-4 w-4 items-center justify-center rounded-sm border border-gray-600 bg-transparent transition peer-checked:border-emerald-500 peer-checked:">
-      {checked && (
-        <Icon
-          icon="mingcute:check-fill"
-          width="10"
-          className="text-[var(--text-highlight)]"
-        />
-      )}
-    </span>
-  </label>
-);
+import Checkbox from "../Checkbox/Checkbox";
 
 const SortMenu = ({ field, onSelect }) => (
   <div className="absolute left-0 top-full z-20 mt-1 w-32 overflow-hidden rounded-lg border border-[var(--dropdown-border)] bg-[#0d1410] shadow-xl">
@@ -117,9 +99,19 @@ const UserProfileTable = ({ usersData = [] }) => {
   };
 
   return (
-    <div className="py-5 text-[var(--text-primary)]">
+    <motion.div
+      className="py-5 text-[var(--text-primary)]"
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35 }}
+    >
       {/* Header */}
-      <div className="mb-3 flex items-center justify-between">
+      <motion.div
+        className="mb-3 flex items-center justify-between"
+        initial={{ opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.1 }}
+      >
         <h1 className="text-sm font-semibold leading-none text-[var(--text-primary)] sm:text-base lg:text-lg">
           User profile
         </h1>
@@ -141,10 +133,15 @@ const UserProfileTable = ({ usersData = [] }) => {
             Export Invoice
           </button>
         </div>
-      </div>
+      </motion.div>
 
       {/* Main Card */}
-      <div className="overflow-hidden rounded-xl border border-[var(--border-color)] bg-[#0b100e] shadow-[0_12px_28px_rgba(0,0,0,0.22)]">
+      <motion.div
+        className="overflow-hidden rounded-xl border border-[var(--border-color)] bg-[#0b100e] shadow-[0_12px_28px_rgba(0,0,0,0.22)]"
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, delay: 0.15 }}
+      >
         {/* Card Header */}
         <div className="flex items-center justify-between border-b border-[var(--border-color)] px-4 py-3">
           <h2 className="text-sm font-semibold text-[var(--text-primary)]">
@@ -260,10 +257,13 @@ const UserProfileTable = ({ usersData = [] }) => {
             </thead>
 
             <tbody>
-              {filteredUsers.map((user) => (
-                <tr
+              {filteredUsers.map((user, i) => (
+                <motion.tr
                   key={user.id}
                   className="border-b border-white/[0.055] transition hover:bg-white/[0.015]"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.25, delay: i * 0.04 }}
                 >
                   {/* Checkbox */}
                   <td className="px-3 py-3">
@@ -331,7 +331,7 @@ const UserProfileTable = ({ usersData = [] }) => {
                       </button>
                     </div>
                   </td>
-                </tr>
+                </motion.tr>
               ))}
 
               {filteredUsers.length === 0 && (
@@ -347,8 +347,8 @@ const UserProfileTable = ({ usersData = [] }) => {
             </tbody>
           </table>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 
