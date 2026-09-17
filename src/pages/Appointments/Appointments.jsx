@@ -12,6 +12,9 @@ import DateInput from '../../components/DateInput/DateInput';
 import ConfirmModal from '../../components/ConfirmModal/ConfirmModal';
 import Pagination from '../../components/Pagination/Pagination';
 
+const gradientButtonStyle = "flex items-center justify-center gap-2 rounded-[12px] border-b border-[#0EFF7B] bg-gradient-to-r from-[#025126] via-[#0D7F41] to-[#025126] px-6 py-[10px] text-[15px] font-semibold text-white shadow-[0_2px_12px_0_rgba(0,0,0,0.25)] transition hover:opacity-90";
+const disabledGradientButtonStyle = "flex items-center justify-center gap-2 rounded-[12px] border-b border-[#0EFF7B]/50 bg-gradient-to-r from-[#025126]/50 via-[#0D7F41]/50 to-[#025126]/50 px-6 py-[10px] text-[15px] font-semibold text-white/50 shadow-[0_2px_12px_0_rgba(0,0,0,0.1)] cursor-not-allowed";
+
 const Appointments = () => {
   const [activeTab, setActiveTab] = useState('All');
   const [activeTimeframe, setActiveTimeframe] = useState('Today');
@@ -188,7 +191,7 @@ const Appointments = () => {
         </div>
         <button 
           onClick={() => setIsAddModalOpen(true)}
-          className="btn btn-gradient flex items-center gap-2"
+          className={gradientButtonStyle}
         >
           <span>+</span> Add Appointments
         </button>
@@ -204,7 +207,7 @@ const Appointments = () => {
                 setActiveTimeframe(time);
                 setCurrentPage(1);
               }}
-              className={"px-6 py-2 rounded-md font-medium " + (activeTimeframe === time ? 'bg-btn-solid text-white' : 'bg-[#1a1a1a] text-gray-300 hover:bg-gray-800')}
+              className={activeTimeframe === time ? gradientButtonStyle : "flex items-center justify-center rounded-[12px] border border-transparent bg-[#1a1a1a] px-6 py-[10px] text-[15px] font-medium text-gray-300 hover:bg-gray-800 transition"}
             >
               {time}
             </button>
@@ -225,7 +228,7 @@ const Appointments = () => {
           </div>
           <button 
             onClick={() => setIsFilterModalOpen(true)} 
-            className={"w-10 h-10 flex items-center justify-center rounded-md border transition " + (appliedFilters ? 'border-text-accent bg-[#025126]/30 text-text-highlight' : 'border-gray-700 bg-transparent hover:bg-gray-800 text-gray-300')}
+            className={"w-11 h-11 flex items-center justify-center rounded-md border transition " + (appliedFilters ? 'border-text-accent bg-[#025126]/30 text-text-highlight' : 'border-gray-700 bg-transparent hover:bg-gray-800 text-gray-300')}
           >
             <Icon icon="lucide:sliders-horizontal" className="w-5 h-5" />
           </button>
@@ -367,11 +370,11 @@ const Appointments = () => {
             </div>
 
             <div className="flex justify-center gap-4">
-              <button onClick={() => setIsAddModalOpen(false)} className="px-8 py-2.5 rounded-md border border-gray-600 text-gray-300 hover:bg-gray-800 transition">Cancel</button>
+              <button onClick={() => setIsAddModalOpen(false)} className="px-8 py-[10px] rounded-[12px] border border-gray-600 text-gray-300 hover:bg-gray-800 transition font-medium">Cancel</button>
               <button 
                 onClick={handleAddAppointment}
                 disabled={!isAddFormValid}
-                className={"px-8 py-2.5 rounded-md text-white font-medium transition " + (isAddFormValid ? 'bg-btn-solid hover:opacity-90' : 'bg-gray-700 cursor-not-allowed opacity-50')}
+                className={isAddFormValid ? gradientButtonStyle : disabledGradientButtonStyle}
               >
                 Add Appointment
               </button>
@@ -436,8 +439,8 @@ const Appointments = () => {
             </div>
 
             <div className="flex justify-center gap-4">
-              <button onClick={() => setIsEditModalOpen(false)} className="px-8 py-2.5 rounded-md border border-gray-600 text-gray-300 hover:bg-gray-800 transition">Cancel</button>
-              <button onClick={handleEditAppointment} className="px-8 py-2.5 rounded-md bg-btn-solid text-white font-medium hover:opacity-90 transition">Update</button>
+              <button onClick={() => setIsEditModalOpen(false)} className="px-8 py-[10px] rounded-[12px] border border-gray-600 text-gray-300 hover:bg-gray-800 transition font-medium">Cancel</button>
+              <button onClick={handleEditAppointment} className={gradientButtonStyle}>Update</button>
             </div>
           </div>
         </div>
@@ -488,8 +491,8 @@ const Appointments = () => {
             </div>
 
             <div className="flex justify-center gap-4">
-              <button onClick={handleClearFilter} className="px-8 py-2.5 rounded-md border border-gray-600 text-gray-300 hover:bg-gray-800 transition">Clear Filters</button>
-              <button onClick={handleApplyFilter} className="px-8 py-2.5 rounded-md bg-btn-solid text-white font-medium hover:opacity-90 transition">Apply Filter</button>
+              <button onClick={handleClearFilter} className="px-8 py-[10px] rounded-[12px] border border-gray-600 text-gray-300 hover:bg-gray-800 transition font-medium">Clear Filters</button>
+              <button onClick={handleApplyFilter} className={gradientButtonStyle}>Apply Filter</button>
             </div>
           </div>
         </div>
