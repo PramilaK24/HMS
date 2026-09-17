@@ -13,7 +13,7 @@ import Doctors from '../pages/Doctors/Doctors';
 import AddDoctor from '../pages/Doctors/AddDoctor';
 import DoctorDetails from '../pages/Doctors/DoctorDetails';
 import LaboratoryAndRadiology from '../pages/ClinicalServices/LaboratoryAndRadiology';
-import { ClinicalReports } from '../pages/ClinicalServices/ClinicalReports';
+import BloodBankAndDonorList from '../pages/ClinicalServices/BloodBankAndDonorList'
 import { AmbulanceManagement } from '../pages/ClinicalServices/AmbulanceMangement';
 import Billing from '../pages/Billing/Billing';
 import Inventory from '../pages/StockInvetory/Inventory';
@@ -58,7 +58,7 @@ const AppRoutes = () => {
         <Route path="/doctors/*" element={<LegacyDoctorRedirect />} />
         
         <Route path="/clinical-services/ambulance-management" element={<AmbulanceManagement />} />
-        <Route path="/clinical-services/clinical-reports" element={<ClinicalReports />} />
+        <Route path="/clinical-services/blood-donor" element={<BloodBankAndDonorList />} />
         <Route path="/clinical-services/laboratory-radiology" element={<LaboratoryAndRadiology />} />
         
         <Route path="/billing" element={<Billing />} />

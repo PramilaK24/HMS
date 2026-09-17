@@ -284,7 +284,7 @@ const ClinicalServicesTabel = ({
                 <tr
                   key={row.id ?? index}
                   onClick={() => onRowClick?.(row)}
-                  className="h-13.5 cursor-pointer border-b border-[#1D1D1D] hover:bg-[#111111]"
+                  className="h-13.5  border-b border-[#1D1D1D] hover:bg-[#111111]"
                 >
                   {/* CHECKBOX */}
                   {selectable && (
@@ -360,7 +360,7 @@ const ClinicalServicesTabel = ({
                               }}
                               className={
                                 action.className ||
-                                "flex h-7 w-7 items-center justify-center rounded-full bg-[#12321F] text-[#4ADE80] hover:bg-[#194A2C]"
+                                "flex h-7 w-7 items-center  justify-center rounded-full bg-[#12321F] text-[#4ADE80] hover:bg-[#194A2C]"
                               }
                             >
                               <Icon
@@ -374,7 +374,7 @@ const ClinicalServicesTabel = ({
                           <button
                             type="button"
                             onClick={(e) => e.stopPropagation()}
-                            className="text-white hover:text-[#4ADE80]"
+                            className="text-white cursor-pointer hover:text-[#4ADE80]"
                           >
                             <Icon icon="tabler:dots-vertical" width="20" />
                           </button>
