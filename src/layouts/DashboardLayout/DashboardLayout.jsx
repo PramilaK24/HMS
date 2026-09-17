@@ -15,8 +15,7 @@ const DashboardLayout = () => {
   };
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-[#0A0A0A]">
-      {/* SIDEBAR */}
+    <div className="flex min-h-screen bg-[#050d0a] text-white">
       <Sidebar
         items={DEFAULT_SIDEBAR_ITEMS}
         profile={DEFAULT_PROFILE}

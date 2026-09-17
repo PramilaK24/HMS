@@ -7,6 +7,9 @@ const Table = ({
   data = [],
   selectable = true,
   showActions = true,
+  showControls = true,
+  caption,
+  emptyMessage = "No data found",
   searchable = true,
   searchPlaceholder = "Search...",
   showFilterButton = true,
@@ -129,7 +132,7 @@ const Table = ({
   return (
     <div className="w-full">
       {/* Top Controls */}
-      <div className="flex items-center justify-between gap-4 mb-5">
+      {showControls && <div className="flex flex-wrap items-center justify-between gap-4 mb-5">
         {/* Left Content */}
         <div className="flex items-center gap-3">
           {leftContent}
@@ -194,11 +197,12 @@ const Table = ({
             </button>
           )}
         </div>
-      </div>
+      </div>}
 
       {/* Table */}
       <div className="w-full overflow-x-auto rounded-xl border border-[#3C3C3C]">
         <table className="w-full min-w-225">
+          {caption && <caption className="sr-only">{caption}</caption>}
           <thead>
             <tr className="border-b border-[#3C3C3C] bg-bg-dark">
               {selectable && (
@@ -317,7 +321,7 @@ const Table = ({
                   }
                   className="px-4 py-10 text-center text-gray-500"
                 >
-                  No data found
+                  {emptyMessage}
                 </td>
               </tr>
             )}

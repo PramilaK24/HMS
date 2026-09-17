@@ -86,7 +86,7 @@ function DoctorProfile({ id }) {
   const [visitType, setVisitType] = useState('All');
   const [dayOffset, setDayOffset] = useState(0);
   const doctor = doctors.find((record) => record.id === id);
-  const returnTo = location.state?.returnTo?.match(/^\/doctors(?:\?|$)/) ? location.state.returnTo : '/doctors';
+  const returnTo = location.state?.returnTo?.match(/^\/doctor-nurse\/doctor(?:\?|$)/) ? location.state.returnTo : '/doctor-nurse/doctor';
   const selectedDate = new Date();
   selectedDate.setDate(selectedDate.getDate() + dayOffset);
   const weekday = selectedDate.getDay() !== 0 && selectedDate.getDay() !== 6;
@@ -110,7 +110,7 @@ function DoctorProfile({ id }) {
           <div className="mb-7 flex flex-wrap items-center justify-between gap-4">
             <h1 ref={titleRef} tabIndex={-1} id="doctor-profile-title" className="text-xl font-medium outline-none">Doctor Profile</h1>
             <div className="text-right">
-              <Button as={Link} to={`/doctors/${doctor.id}/medicine-allocation`} state={{ returnTo }} className="bg-btn-solid px-4 py-2 text-sm"><Icon icon="solar:add-circle-linear" width="18" /> Medicine Allocation</Button>
+              <Button as={Link} to={`/doctor-nurse/doctor/${doctor.id}/medicine-allocation`} state={{ returnTo }} className="bg-btn-solid px-4 py-2 text-sm"><Icon icon="solar:add-circle-linear" width="18" /> Medicine Allocation</Button>
             </div>
           </div>
           <div className="grid min-w-0 gap-8 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
@@ -128,7 +128,7 @@ function DoctorProfile({ id }) {
                     <Button as="a" href={'mailto:' + doctor.email} aria-label={'Email Dr. ' + doctor.name} className="rounded-full bg-white/5 p-2 text-text-accent"><Icon icon="solar:letter-linear" width="22" /></Button>
                   </div>
                 </div>
-                <Button as={Link} to={'/doctors/' + doctor.id + '/edit'} state={{ returnTo }} aria-label="Edit Doctor" title="Edit Doctor" className="absolute right-0 top-0 rounded-full bg-white/5 p-2 text-text-accent"><Icon icon="solar:pen-linear" width="22" /></Button>
+                <Button as={Link} to={'/doctor-nurse/doctor/' + doctor.id + '/edit'} state={{ returnTo }} aria-label="Edit Doctor" title="Edit Doctor" className="absolute right-0 top-0 rounded-full bg-white/5 p-2 text-text-accent"><Icon icon="solar:pen-linear" width="22" /></Button>
               </div>
               <InformationSection title="Basic Information" items={[
                 ['Gender', doctor.gender], ['Age', getAge(doctor.dateOfBirth)], ['Blood group', doctor.bloodGroup],
@@ -186,7 +186,7 @@ function DoctorProfile({ id }) {
                 ) : <div role="status" className="rounded-lg border border-white/10 px-5 py-10 text-center text-sm text-white/55">{!isActive ? 'No visits scheduled while this doctor is inactive or on leave.' : !hasDemoSchedule ? 'No patient visits scheduled for this doctor.' : !scheduledDay || !sessions.length ? 'No visits scheduled on this day.' : 'No visits match this filter.'}</div>}
               </section>
               <section className="mt-7" aria-labelledby="availability-title">
-                <div className="flex flex-wrap items-center justify-between gap-3"><h2 id="availability-title" className="text-base">Availability</h2><Button as={Link} to={`/doctors/${doctor.id}/edit`} state={{ returnTo }} className="text-xs text-text-highlight underline">Edit availability</Button></div>
+                <div className="flex flex-wrap items-center justify-between gap-3"><h2 id="availability-title" className="text-base">Availability</h2><Button as={Link} to={`/doctor-nurse/doctor/${doctor.id}/edit`} state={{ returnTo }} className="text-xs text-text-highlight underline">Edit availability</Button></div>
                 {isActive && doctor.availabilityDays && sessions.length ? <><p className="mb-3 mt-4 text-sm text-white/50">{doctor.availabilityDays}</p><div className="flex flex-wrap gap-3">{sessions.map(([start, end]) => <span key={start} className="rounded-full border border-text-accent/50 px-3 py-2 text-xs text-white/80 shadow-[0_0_12px_#00a04820]">{formatTime(start)} – {formatTime(end)}</span>)}</div></> : <p className="mt-4 text-sm text-white/55">{!isActive ? 'Currently unavailable' : 'Availability has not been configured.'}</p>}
               </section>
             </div>
@@ -287,7 +287,7 @@ function MedicineAllocation({ id }) {
     window.addEventListener('focus', onFocus);
     return () => { window.removeEventListener('storage', refresh); window.removeEventListener('focus', onFocus); };
   }, []);
-  const returnTo = location.state?.returnTo?.match(/^\/doctors(?:\?|$)/) ? location.state.returnTo : '/doctors';
+  const returnTo = location.state?.returnTo?.match(/^\/doctor-nurse\/doctor(?:\?|$)/) ? location.state.returnTo : '/doctor-nurse/doctor';
   const patient = allocationPatients.find((record) => record.id === patientId);
   const matchingPatients = allocationPatients.filter((record) => (record.name + ' ' + record.id).toLowerCase().includes(query.trim().toLowerCase()));
   const medicine = saved.data.medicines.find((record) => record.id === values.medicineId);
@@ -394,7 +394,7 @@ function MedicineAllocation({ id }) {
 
   return (
     <section className="mx-auto w-full min-w-0 max-w-[1400px] text-white" aria-labelledby="allocation-title">
-      <Button as={Link} to={doctor ? '/doctors/' + id : returnTo} state={{ returnTo }} className="mb-5 bg-btn-solid px-4 py-2 text-sm"><Icon icon="solar:arrow-left-linear" width="18" />{doctor ? 'Back to Doctor Profile' : 'Back to Doctors'}</Button>
+      <Button as={Link} to={doctor ? '/doctor-nurse/doctor/' + id : returnTo} state={{ returnTo }} className="mb-5 bg-btn-solid px-4 py-2 text-sm"><Icon icon="solar:arrow-left-linear" width="18" />{doctor ? 'Back to Doctor Profile' : 'Back to Doctors'}</Button>
       <h1 ref={headingRef} tabIndex={-1} id="allocation-title" className="text-xl font-medium outline-none">{doctor ? 'Medicine Allocation' : 'Doctor not found'}</h1>
       {!doctor ? <p className="mt-4 text-white/60">Choose an existing doctor from the list.</p> : <>
         <p className="mt-2 text-sm text-white/55">Dr. {doctor.name} · Demo only — fictional patients and medicine stock.</p>

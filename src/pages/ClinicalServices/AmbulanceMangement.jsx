@@ -1,9 +1,7 @@
 import React from 'react'
 
-const AmbulanceMangement = () => {
+export const AmbulanceManagement = () => {
   return (
-    <div>AmbulanceMangement</div>
+    <div>Ambulance Management</div>
   )
 }
-
-export default AmbulanceMangement

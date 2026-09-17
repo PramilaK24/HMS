@@ -32,7 +32,7 @@ export default function Doctors() {
   ));
   const page = Math.min(Number.isSafeInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1, Math.max(1, Math.ceil(visibleDoctors.length / pageSize)));
   const pageDoctors = visibleDoctors.slice((page - 1) * pageSize, page * pageSize);
-  const returnTo = `/doctors${params.size ? `?${params}` : ''}`;
+  const returnTo = `/doctor-nurse/doctor${params.size ? `?${params}` : ''}`;
   const selectClass = 'max-w-full rounded-md border border-text-accent/60 bg-[#08170f] px-3 py-2 text-xs text-white/85 focus:outline-2 focus:outline-text-highlight';
 
   return (
@@ -44,7 +44,7 @@ export default function Doctors() {
             Total Doctors <span className="inline-flex min-w-6 items-center justify-center rounded-full bg-btn-solid px-2 py-1 text-text-highlight">{doctors.length}</span>
           </p>
         </div>
-        <Button as={Link} to="/doctors/add" state={{ returnTo }} className="border border-text-accent/60 bg-btn-solid px-5 py-2 text-sm text-white hover:bg-text-accent/60">
+        <Button as={Link} to="/doctor-nurse/doctor/add" state={{ returnTo }} className="border border-text-accent/60 bg-btn-solid px-5 py-2 text-sm text-white hover:bg-text-accent/60">
           <Icon icon="solar:user-plus-linear" width="18" aria-hidden="true" /> Add Doctor
         </Button>
       </div>
@@ -87,7 +87,7 @@ function DoctorCard({ doctor, returnTo }) {
   return (
     <Card as="article">
       <div className="mb-2 flex justify-end">
-        <Button as={Link} to={`/doctors/${doctor.id}/edit`} state={{ returnTo }} aria-label={`Edit Dr. ${doctor.name}`} className="text-xs text-white/70 hover:text-text-highlight">
+        <Button as={Link} to={`/doctor-nurse/doctor/${doctor.id}/edit`} state={{ returnTo }} aria-label={`Edit Dr. ${doctor.name}`} className="text-xs text-white/70 hover:text-text-highlight">
           <Icon icon="solar:pen-linear" width="14" aria-hidden="true" /> Edit
         </Button>
       </div>
@@ -110,7 +110,7 @@ function DoctorCard({ doctor, returnTo }) {
         ))}
       </dl>
       <div className="mt-6 text-center">
-        <Button as={Link} to={`/doctors/${doctor.id}`} state={{ returnTo }} aria-label={`View Dr. ${doctor.name} profile`} className="border border-text-accent/40 bg-btn-solid/50 px-4 py-1.5 text-xs text-white hover:bg-btn-solid">
+        <Button as={Link} to={`/doctor-nurse/doctor/${doctor.id}`} state={{ returnTo }} aria-label={`View Dr. ${doctor.name} profile`} className="border border-text-accent/40 bg-btn-solid/50 px-4 py-1.5 text-xs text-white hover:bg-btn-solid">
           View Profile
         </Button>
       </div>
