@@ -26,6 +26,7 @@ import SecuritySettings from '../pages/Settings/SecuritySettings';
 import { Departments } from '../pages/Administration/Departments';
 import { RoomManagement } from '../pages/Administration/RoomManagement';
 import { StaffManagement } from '../pages/Administration/StaffManagement';
+import AccessManagement from '../pages/Settings/AccessManagement';
 import NotFound from '../components/NotFound/NotFound';
 
 const AppRoutes = () => {
@@ -72,6 +73,7 @@ const AppRoutes = () => {
         
         <Route path="/settings" element={<Settings />} />
         <Route path="/settings/security" element={<SecuritySettings />} />
+        <Route path="/settings/access-management" element={<AccessManagement />} />
         <Route path="*" element={<NotFound />} />
       </Route>
 

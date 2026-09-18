@@ -1,7 +1,7 @@
 import { Icon } from "@iconify/react";
 import { useNavigate } from "react-router-dom";
 
-const BackButton = ({ label = "Back" }) => {
+const BackButton = ({ label = "Back", icon = true }) => {
   const navigate = useNavigate();
 
   return (
@@ -9,7 +9,7 @@ const BackButton = ({ label = "Back" }) => {
       type="button"
       onClick={() => navigate(-1)}
       className="
-        flex h-[40px] w-[92px]
+        flex h-[40px] min-w-[92px]
         items-center justify-center gap-2
         rounded-[8px]
         border-b border-top-1 border-emerald-400
@@ -24,11 +24,13 @@ const BackButton = ({ label = "Back" }) => {
         active:scale-[0.98]
       "
     >
-      <Icon
-        icon="solar:arrow-left-linear"
-        width={24}
-        height={24}
-      />
+      {icon && (
+        <Icon
+          icon="solar:arrow-left-linear"
+          width={24}
+          height={24}
+        />
+      )}
 
       <span className="text-[14px] font-normal">
         {label}
