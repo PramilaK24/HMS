@@ -1,26 +1,27 @@
 import React, { useState } from 'react';
-import { Icon } from '@iconify/react';
 import Button from '../../components/Button/Button';
+import PatientHeaderFilter from '../../components/PatientHeaderFilter/PatientHeaderFilter';
+import { PATIENT_PROFILES } from '../../constants/billingConstants';
 
-export default function PharmacyBillHeader() {
-  const [formData, setFormData] = useState({
-    name: 'Watson',
-    patientId: 'SAH257384',
-    age: '45',
-    pharmacyBillId: 'THY567890',
-    date: '10-08-2025',
-    billingStaff: 'Anitha',
-    staffId: 'STAC5678',
-    patientType: 'Outpatient',
-    address: 'New York, USA',
-    doctorName: 'Keerthana',
-    paymentType: 'Full Payment',
-    paymentStatus: 'Paid',
-    paymentMode: 'Cash in hand'
-  });
+export default function PharmacyBillHeader({ formData: externalData, setFormData: externalSetData }) {
+  const [internalData, setInternalData] = useState(PATIENT_PROFILES['Jeo Darlington']);
+
+  const formData = externalData || internalData;
+  const setFormData = externalSetData || setInternalData;
 
   const handleChange = (field, value) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    if (field === 'name' && PATIENT_PROFILES[value]) {
+      setFormData(PATIENT_PROFILES[value]);
+    } else if (field === 'patientId') {
+      const match = Object.values(PATIENT_PROFILES).find((p) => p.patientId === value);
+      if (match) {
+        setFormData(match);
+      } else {
+        setFormData((prev) => ({ ...prev, [field]: value }));
+      }
+    } else {
+      setFormData((prev) => ({ ...prev, [field]: value }));
+    }
   };
 
   const handleClear = () => {
@@ -47,51 +48,14 @@ export default function PharmacyBillHeader() {
   return (
     <div className="space-y-4">
       {/* Top Title & Filters Row */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h2 className="text-xl  text-white">Pharmacy bill generation</h2>
-          <p className="mt-1 text-xs text-white/60">This is the information only related to pharmacy department</p>
-        </div>
-
-        <div className="flex flex-wrap items-end gap-4">
-          {/* Search patient name or ID */}
-          <div className="relative flex items-center">
-            <Icon icon="lucide:search" width="14" className="absolute left-3 text-text-accent" />
-            <input
-              type="search"
-              placeholder="Search patient name or ID"
-              className="w-64 rounded-md border border-text-accent/50 bg-[#052315] py-2 pl-9 pr-3 text-xs text-white placeholder:text-white/40 focus:border-text-highlight focus:outline-none"
-            />
-          </div>
-
-          {/* Patient name select */}
-          <div className="flex flex-col gap-1">
-            <label className="text-xs text-white/80 font-normal">Patient name</label>
-            <select
-              value={formData.name}
-              onChange={(e) => handleChange('name', e.target.value)}
-              className="w-36 rounded-md border border-text-accent/50 bg-[#040f08] px-3 py-2 text-xs text-text-highlight focus:outline-none cursor-pointer"
-            >
-              <option value="Watson">Watson</option>
-              <option value="Matthew">Matthew</option>
-              <option value="Anita">Anita</option>
-            </select>
-          </div>
-
-          {/* Patient ID select */}
-          <div className="flex flex-col gap-1">
-            <label className="text-xs text-white/80 font-normal">Patient ID</label>
-            <select
-              value={formData.patientId}
-              onChange={(e) => handleChange('patientId', e.target.value)}
-              className="w-36 rounded-md border border-text-accent/50 bg-[#040f08] px-3 py-2 text-xs text-text-highlight focus:outline-none cursor-pointer"
-            >
-              <option value="SAH257384">SAH257384</option>
-              <option value="SAH257385">SAH257385</option>
-            </select>
-          </div>
-        </div>
-      </div>
+      <PatientHeaderFilter
+        title="Pharmacy bill generation"
+        subtitle="This is the information only related to pharmacy department"
+        patientName={formData.name || formData.patientName || 'Jeo Darlington'}
+        onPatientNameChange={(val) => handleChange('name', val)}
+        patientId={formData.patientId || 'SAH257384'}
+        onPatientIdChange={(val) => handleChange('patientId', val)}
+      />
 
       {/* 3-Column Card Form Container */}
       <div className="rounded-[12px] border border-[#0EFF7B0D] p-6 shadow-[inset_0_0_14px_#00a04812]">
@@ -103,7 +67,7 @@ export default function PharmacyBillHeader() {
               <label className={labelClass}>Name</label>
               <input
                 type="text"
-                value={formData.name}
+                value={formData.name || ''}
                 onChange={(e) => handleChange('name', e.target.value)}
                 className={inputClass}
               />
@@ -113,7 +77,7 @@ export default function PharmacyBillHeader() {
               <label className={labelClass}>Patient ID</label>
               <input
                 type="text"
-                value={formData.patientId}
+                value={formData.patientId || ''}
                 onChange={(e) => handleChange('patientId', e.target.value)}
                 className={inputClass}
               />
@@ -123,7 +87,7 @@ export default function PharmacyBillHeader() {
               <label className={labelClass}>Age</label>
               <input
                 type="text"
-                value={formData.age}
+                value={formData.age || ''}
                 onChange={(e) => handleChange('age', e.target.value)}
                 className={inputClass}
               />
@@ -133,7 +97,7 @@ export default function PharmacyBillHeader() {
               <label className={labelClass}>Pharmacy Bill ID</label>
               <input
                 type="text"
-                value={formData.pharmacyBillId}
+                value={formData.pharmacyBillId || ''}
                 onChange={(e) => handleChange('pharmacyBillId', e.target.value)}
                 className={inputClass}
               />
@@ -143,7 +107,7 @@ export default function PharmacyBillHeader() {
               <label className={labelClass}>Date</label>
               <input
                 type="text"
-                value={formData.date}
+                value={formData.date || ''}
                 onChange={(e) => handleChange('date', e.target.value)}
                 className={inputClass}
               />
@@ -156,7 +120,7 @@ export default function PharmacyBillHeader() {
               <label className={labelClass}>Billling Staff</label>
               <input
                 type="text"
-                value={formData.billingStaff}
+                value={formData.billingStaff || formData.staffName || ''}
                 onChange={(e) => handleChange('billingStaff', e.target.value)}
                 className={inputClass}
               />
@@ -166,7 +130,7 @@ export default function PharmacyBillHeader() {
               <label className={labelClass}>Staff ID</label>
               <input
                 type="text"
-                value={formData.staffId}
+                value={formData.staffId || formData.billingStaffId || ''}
                 onChange={(e) => handleChange('staffId', e.target.value)}
                 className={inputClass}
               />
@@ -175,7 +139,7 @@ export default function PharmacyBillHeader() {
             <div className="flex items-center gap-2">
               <label className={labelClass}>Patient Type</label>
               <select
-                value={formData.patientType}
+                value={formData.patientType || 'Outpatient'}
                 onChange={(e) => handleChange('patientType', e.target.value)}
                 className={inputClass}
               >
@@ -188,7 +152,7 @@ export default function PharmacyBillHeader() {
               <label className={labelClass}>Address</label>
               <input
                 type="text"
-                value={formData.address}
+                value={formData.address || ''}
                 onChange={(e) => handleChange('address', e.target.value)}
                 className={inputClass}
               />
@@ -198,7 +162,7 @@ export default function PharmacyBillHeader() {
               <label className={labelClass}>Doctor name</label>
               <input
                 type="text"
-                value={formData.doctorName}
+                value={formData.doctorName || ''}
                 onChange={(e) => handleChange('doctorName', e.target.value)}
                 className={inputClass}
               />
@@ -211,7 +175,7 @@ export default function PharmacyBillHeader() {
               <div className="flex items-center gap-2">
                 <label className={labelClass}>Payment Type</label>
                 <select
-                  value={formData.paymentType}
+                  value={formData.paymentType || 'Full Payment'}
                   onChange={(e) => handleChange('paymentType', e.target.value)}
                   className={inputClass}
                 >
@@ -223,7 +187,7 @@ export default function PharmacyBillHeader() {
               <div className="flex items-center gap-2">
                 <label className={labelClass}>Payment Status</label>
                 <select
-                  value={formData.paymentStatus}
+                  value={formData.paymentStatus || 'Paid'}
                   onChange={(e) => handleChange('paymentStatus', e.target.value)}
                   className={inputClass}
                 >
@@ -235,10 +199,11 @@ export default function PharmacyBillHeader() {
               <div className="flex items-center gap-2">
                 <label className={labelClass}>Payment Mode</label>
                 <select
-                  value={formData.paymentMode}
+                  value={formData.paymentMode || 'Cash'}
                   onChange={(e) => handleChange('paymentMode', e.target.value)}
                   className={inputClass}
                 >
+                  <option value="Cash">Cash</option>
                   <option value="Cash in hand">Cash in hand</option>
                   <option value="Card">Card</option>
                   <option value="UPI">UPI</option>
