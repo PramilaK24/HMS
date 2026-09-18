@@ -36,7 +36,7 @@ export const DEFAULT_SIDEBAR_ITEMS = [
   { label: 'Clinical Services', path: '/clinical-services', icon: 'healthicons:virus-lab-research-syringe',
     children: [
       { label: 'Laboratory & Radiology', path: '/clinical-services/laboratory-radiology', icon: 'healthicons:virus-lab-research-test-tube-outline' },
-      { label: 'Clinical Reports', path: '/clinical-services/clinical-reports', icon: 'material-symbols:person-add-rounded' },
+      { label: 'Blood Bank & Donor List', path: '/clinical-services/blood-donor', icon: 'material-symbols:person-add-rounded' },
       { label: 'Ambulance Management', path: '/clinical-services/ambulance-management', icon: 'boxicons:ambulance' },
     ],
    },
