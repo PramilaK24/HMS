@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useLocation, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams, useSearchParams } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 import Card from '../../components/Card/Card';
 import Button from '../../components/Button/Button';
@@ -9,7 +9,6 @@ import Search from '../../components/Search/Search';
 import Table from '../../components/Table/Table';
 import Pagination from '../../components/Pagination/Pagination';
 import Modal from '../../components/Modal/Modal';
-import { APPOINTMENTS_DATA } from '../../constants/mockAppointments';
 import { loadDoctors, useDoctors } from './Doctors';
 
 // Isolated illustrative schedule; this does not represent Appointments module records.
@@ -21,12 +20,6 @@ const demoVisits = [
   { title: 'New Patient Consultations', time: '2:00 PM – 4:00 PM', description: 'First-time visits and detailed assessments.', type: 'Check up' },
   { title: 'Outpatient & Emergency Consults', time: '4:00 PM – 7:00 PM', description: 'Follow-up visits and urgent patient care.', type: 'Urgent visit' },
 ];
-
-function formatDate(value) {
-  if (!value) return 'Not specified';
-  const date = new Date(value + 'T00:00:00');
-  return Number.isNaN(date.getTime()) ? 'Not specified' : date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-}
 
 function getAge(value) {
   if (!value) return '';
@@ -83,19 +76,16 @@ function DoctorProfile({ id }) {
   const titleRef = useRef(null);
   useEffect(() => { titleRef.current?.focus(); }, []);
   const doctors = useDoctors();
-  const [visitType, setVisitType] = useState('All');
-  const [dayOffset, setDayOffset] = useState(0);
+  const [visitType, setVisitType] = useState('');
+  const [visitPage, setVisitPage] = useState(0);
   const doctor = doctors.find((record) => record.id === id);
   const returnTo = location.state?.returnTo?.match(/^\/doctor-nurse\/doctor(?:\?|$)/) ? location.state.returnTo : '/doctor-nurse/doctor';
-  const selectedDate = new Date();
-  selectedDate.setDate(selectedDate.getDate() + dayOffset);
-  const weekday = selectedDate.getDay() !== 0 && selectedDate.getDay() !== 6;
   const hasDemoSchedule = doctor?.profileDemo === true;
   const isActive = doctor?.status === 'Active';
-  const scheduledDay = doctor?.availabilityDays === 'Every day' || (doctor?.availabilityDays === 'Weekdays (Mon–Fri)' && weekday) || (doctor?.availabilityDays === 'Weekends (Sat–Sun)' && !weekday);
-  const sessions = [[doctor?.availableFrom, doctor?.availableTo], [doctor?.availableFrom2, doctor?.availableTo2]].filter(([start, end]) => start && end);
-  const visits = hasDemoSchedule && isActive && scheduledDay && sessions.length ? demoVisits.filter((visit) => visitType === 'All' || visit.type === visitType) : [];
-  const certificates = Array.isArray(doctor?.certificates) ? doctor.certificates : [];
+  const sessions = [['09:00', '12:00'], ['16:00', '19:00']];
+  const filteredVisits = isActive ? demoVisits.filter((visit) => !visitType || visit.type === visitType) : [];
+  const visits = filteredVisits.slice(visitPage * 6, visitPage * 6 + 6);
+
 
   return (
     <section aria-labelledby="doctor-profile-title" className="mx-auto w-full min-w-0 max-w-[1400px] text-white">
@@ -113,14 +103,14 @@ function DoctorProfile({ id }) {
               <Button as={Link} to={`/doctor-nurse/doctor/${doctor.id}/medicine-allocation`} state={{ returnTo }} className="bg-btn-solid px-4 py-2 text-sm"><Icon icon="solar:add-circle-linear" width="18" /> Medicine Allocation</Button>
             </div>
           </div>
-          <div className="grid min-w-0 gap-8 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
-            <div className="min-w-0">
+          <div className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+            <div className="min-w-0 rounded-xl bg-[#0b100d] p-3">
               <div className="relative flex flex-col items-start gap-5 pr-10 sm:flex-row sm:items-center">
                 <div className="flex h-48 w-36 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#0d281a] text-text-accent">
-                  {doctor.photo ? <img src={doctor.photo} alt={'Dr. ' + doctor.name} className="size-full object-cover" /> : <Icon icon="solar:user-rounded-bold" width="76" />}
+                  {doctor.photo ? <img src={doctor.photo} alt={'Dr. ' + doctor.name} className="size-full object-cover" /> : null}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <span className={'inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs ' + (isActive ? 'border-text-accent text-text-highlight' : 'border-white/30 text-white/60')}><span className="size-1.5 rounded-full bg-current" />{doctor.status}</span>
+                  <span className={'inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs ' + (isActive ? 'border-text-accent text-text-highlight' : 'border-white/30 text-white/60')}><span className="size-1.5 rounded-full bg-current" />{isActive ? 'Available' : doctor.status}</span>
                   <h2 className="mt-5 break-words text-xl font-medium">Dr. {doctor.name}</h2>
                   <p className="mt-2 text-sm text-white/55">{doctor.specialist}</p>
                   <div className="mt-5 flex gap-3">
@@ -138,56 +128,40 @@ function DoctorProfile({ id }) {
               </InformationSection>
               <InformationSection title="About the Physician" items={[
                 ['Experience', doctor.experience ? doctor.experience + ' years' : ''],
-                ['Department', doctor.department], ['License number', doctor.licenseNumber],
-                ['Specialization', doctor.specialist], ['Board certifications', doctor.boardCertifications],
-                ['Professional memberships', doctor.memberships], ['Languages spoken', doctor.languages],
-                ['Awards & recognitions', doctor.awards],
+                ['Department', doctor.department],
               ]} />
-              <details className="mt-7 rounded-lg border border-white/10 p-4">
-                <summary className="cursor-pointer text-sm text-white/75 focus-visible:outline-2 focus-visible:outline-text-highlight">Additional details & documents</summary>
-                <InformationSection title="Personal & employment details" items={[
-                  ['Doctor ID', doctor.id], ['Date of birth', formatDate(doctor.dateOfBirth)], ['Marital status', doctor.maritalStatus],
-                  ['Address', doctor.address], ['City', doctor.city], ['Country', doctor.country],
-                  ['Date of joining', formatDate(doctor.joiningDate)], ['Designation', doctor.designation], ['Shift timing', doctor.shiftTiming],
-                  ['National ID file', doctor.nationalId?.name], ['Certificate files', certificates.map((file) => file.name).join(', ')],
-                ]} />
-                <p className="mt-4 text-xs text-white/45">Documents contain saved file details only; no files are uploaded.</p>
-              </details>
+
             </div>
-            <div className="min-w-0">
+            <div className="min-w-0 rounded-xl bg-[#0b100d] p-3">
               <div className="grid gap-3 sm:grid-cols-3">
-                <MetricCard label="Total patients" icon="solar:users-group-rounded-linear" value={hasDemoSchedule ? '230' : '—'} detail={hasDemoSchedule ? '3.5% increase from yesterday' : 'No patient data available'} />
-                <MetricCard label="Surgeries" icon="solar:health-linear" value={hasDemoSchedule ? '90' : '—'} detail={hasDemoSchedule ? '96% success rate' : 'No surgery data available'} />
-                <MetricCard label="Reviews" icon="solar:star-linear" value={hasDemoSchedule ? '4.5/5' : '—'} detail={hasDemoSchedule ? 'Based on sample patient reviews' : 'No reviews available'} />
+                <MetricCard label="Total patients" icon="solar:users-group-rounded-linear" value={hasDemoSchedule ? '230' : '—'} detail={hasDemoSchedule ? '3.5% Have increased from yesterday' : 'No patient data available'} />
+                <MetricCard label="Surgeries" icon="solar:health-linear" value={hasDemoSchedule ? '90' : '—'} detail={hasDemoSchedule ? '95% Success rate' : 'No surgery data available'} />
+                <MetricCard label="Reviews" icon="solar:star-linear" value={hasDemoSchedule ? '4.5/5' : '—'} detail={hasDemoSchedule ? 'Based on patient review' : 'No reviews available'} />
               </div>
-              <p className="mt-3 text-xs text-white/45">{hasDemoSchedule ? 'Illustrative demo metrics and schedule; not linked to Appointments.' : 'Patient metrics and schedules have not been added for this doctor.'}</p>
-              <section className="mt-7" aria-labelledby="patient-visits-title">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <h2 id="patient-visits-title" className="text-base">Patient Visits</h2>
-                  <div className="flex items-center gap-2">
-                    <Button aria-label="Previous day" onClick={() => setDayOffset((day) => day - 1)} className="rounded-full bg-btn-solid p-1.5"><Icon icon="solar:alt-arrow-left-linear" width="18" /></Button>
-                    <Button aria-label="Next day" onClick={() => setDayOffset((day) => day + 1)} className="rounded-full bg-btn-solid p-1.5"><Icon icon="solar:alt-arrow-right-linear" width="18" /></Button>
+              <section className="mt-6" aria-labelledby="patient-visits-title">
+                <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                  <h2 id="patient-visits-title" className="text-sm">Patient Visits</h2>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <div className="flex gap-2" role="group" aria-label="Filter patient visits">
+                      {['Check up', 'Urgent visit'].map((type) => <Button key={type} aria-pressed={visitType === type} onClick={() => { setVisitType((current) => current === type ? '' : type); setVisitPage(0); }} className="gap-1 text-[11px] text-white/75"><span className={'size-2 rounded-full border ' + (visitType === type ? 'border-text-highlight bg-text-highlight shadow-[0_0_5px_#0eff7b]' : 'border-white/45')} />{type}</Button>)}
+                    </div>
+                    <div className="flex gap-1">
+                      <Button aria-label="Previous visits" disabled={visitPage === 0} onClick={() => setVisitPage((page) => page - 1)} className="rounded-full bg-btn-solid p-1 text-text-highlight"><Icon icon="solar:alt-arrow-left-linear" width="18" /></Button>
+                      <Button aria-label="Next visits" disabled={(visitPage + 1) * 6 >= filteredVisits.length} onClick={() => setVisitPage((page) => page + 1)} className="rounded-full bg-btn-solid p-1 text-text-highlight"><Icon icon="solar:alt-arrow-right-linear" width="18" /></Button>
+                    </div>
                   </div>
                 </div>
-                <div className="my-4 flex flex-wrap items-center justify-between gap-3">
-                  <p aria-live="polite" className="text-xs text-white/60">{selectedDate.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}</p>
-                  <div className="flex flex-wrap gap-2" role="group" aria-label="Filter patient visits">
-                    {['All', 'Check up', 'Urgent visit'].map((type) => <Button key={type} aria-pressed={visitType === type} onClick={() => setVisitType(type)} className={'rounded-full border px-2.5 py-1 text-xs ' + (visitType === type ? 'border-text-accent bg-btn-solid text-text-highlight' : 'border-white/15 text-white/60')}>{type}</Button>)}
-                  </div>
-                </div>
-                {visits.length ? (
-                  <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                    {visits.map((visit) => <Card as="article" key={visit.title} className="!border-0 !bg-[#0d281a] !p-4">
-                      <h3 className="text-xs text-white/80">{visit.title}</h3>
-                      <p className="my-3 text-sm font-medium text-text-accent">{visit.time}</p>
-                      <p className="text-xs italic leading-relaxed text-white/65">{visit.description}</p>
-                    </Card>)}
-                  </div>
-                ) : <div role="status" className="rounded-lg border border-white/10 px-5 py-10 text-center text-sm text-white/55">{!isActive ? 'No visits scheduled while this doctor is inactive or on leave.' : !hasDemoSchedule ? 'No patient visits scheduled for this doctor.' : !scheduledDay || !sessions.length ? 'No visits scheduled on this day.' : 'No visits match this filter.'}</div>}
+                {visits.length ? <div className="grid gap-2 sm:grid-cols-3">
+                  {visits.map((visit) => <Card as="article" key={visit.title} className="flex min-h-32 flex-col !border-0 !bg-[#0d281a] !p-3">
+                    <h3 className="text-[11px] leading-snug text-white/85">{visit.title}</h3>
+                    <p className="my-3 text-xs text-text-highlight">{visit.time}</p>
+                    <p className="text-[10px] italic leading-snug text-white/85">{visit.description}</p>
+                  </Card>)}
+                </div> : <p role="status" className="py-8 text-center text-sm text-white/55">{!isActive ? 'Currently unavailable' : 'No visits match this filter.'}</p>}
               </section>
-              <section className="mt-7" aria-labelledby="availability-title">
-                <div className="flex flex-wrap items-center justify-between gap-3"><h2 id="availability-title" className="text-base">Availability</h2><Button as={Link} to={`/doctor-nurse/doctor/${doctor.id}/edit`} state={{ returnTo }} className="text-xs text-text-highlight underline">Edit availability</Button></div>
-                {isActive && doctor.availabilityDays && sessions.length ? <><p className="mb-3 mt-4 text-sm text-white/50">{doctor.availabilityDays}</p><div className="flex flex-wrap gap-3">{sessions.map(([start, end]) => <span key={start} className="rounded-full border border-text-accent/50 px-3 py-2 text-xs text-white/80 shadow-[0_0_12px_#00a04820]">{formatTime(start)} – {formatTime(end)}</span>)}</div></> : <p className="mt-4 text-sm text-white/55">{!isActive ? 'Currently unavailable' : 'Availability has not been configured.'}</p>}
+              <section className="mt-6" aria-labelledby="availability-title">
+                <h2 id="availability-title" className="text-sm">Availability</h2>
+                {isActive ? <><p className="mb-3 mt-5 text-xs text-white/50">only on week days (Mon–Fri)</p><div className="flex flex-wrap gap-3">{sessions.map(([start, end]) => <span key={start} className="rounded-full border border-text-accent/50 px-3 py-2 text-[10px] text-white/80 shadow-[0_0_12px_#00a04820]">{formatTime(start)} – {formatTime(end)}</span>)}</div></> : <p className="mt-4 text-sm text-white/55">Currently unavailable</p>}
               </section>
             </div>
           </div>
@@ -199,10 +173,20 @@ function DoctorProfile({ id }) {
 
 
 // Fictional patient and stock data for the local demonstration.
+// These fixtures are local to this screen, not shared appointment records.
 const allocationPatients = [
-  { id: 'DEMO-P001', name: 'Watson', department: 'Cardiology', gender: 'Female', age: '28', bloodGroup: 'A+', bed: 'RM 325', consultation: 'In-patient', email: 'watson@example.com', pressure: '133/98 mmHg', temperature: '98.4 °F', heartRate: '102 bpm' },
-  ...APPOINTMENTS_DATA.map((patient) => ({ id: patient.patientId, name: patient.name, department: patient.department, bed: patient.room, consultation: patient.type })),
+  { id: 'SAH257384', name: 'Watson', title: 'Mrs. Watson', department: 'Cardiology', gender: 'Female', age: '28', bloodGroup: 'A+ve', bed: 'RM 325', consultation: 'In-patient', email: 'watson22@example.com', pressure: '133/98', temperature: '98.4 F', heartRate: '102' },
+  { id: 'SAH257385', name: 'Anjali', title: 'Ms. Anjali', department: 'Dermatology', gender: 'Female', age: '32', bloodGroup: 'B+ve', bed: 'RM 205', consultation: 'Out-patient', email: 'anjali@example.com' },
+  { id: 'SAH257386', name: 'Rahul', title: 'Mr. Rahul', department: 'Neurology', gender: 'Male', age: '40', bloodGroup: 'O+ve', bed: 'RM 309', consultation: 'In-patient', email: 'rahul@example.com' },
 ];
+// Figma sample history is display-only and never consumes current demo stock.
+const sampleAllocationHistory = [
+  ['2025-07-16', 'Amoxicillin', '500 mg', 5],
+  ['2025-05-26', 'Metformin', '10 mg', 15],
+  ['2025-04-04', 'Paracetamol', '100 mg', 30],
+  ['2024-03-01', 'Paracetamol', '100 mg', 5],
+  ['2024-02-02', 'Metformin', '10 mg', 15],
+].map(([date, medicineName, dosage, duration], index) => ({ id: 'sample-allocation-' + index, patientId: 'SAH257384', patientName: 'Watson', department: 'Cardiology', doctorName: 'Smith', createdAt: date + 'T08:00:00', medicineName, dosage, duration }));
 const initialMedicines = [
   { id: 'amoxicillin', name: 'Amoxicillin', stock: 100 },
   { id: 'paracetamol', name: 'Paracetamol', stock: 200 },
@@ -211,13 +195,10 @@ const initialMedicines = [
 const initialLabTests = ['Blood test', 'Urine test', 'X-ray'];
 const allocationKey = 'hms.medicineAllocations.v1';
 const emptyAllocation = { medicineId: '', dosage: '', quantity: '', frequency: '', duration: '', time: '', labTest: '' };
-const allocationSelectClass = 'w-full rounded-md border border-white/20 bg-bg-dark px-3 py-2.5 text-sm text-white focus:outline-2 focus:outline-text-highlight';
-const allocationFields = [
-  ['dosage', 'Dosage', 'text'], ['quantity', 'Quantity', 'number'],
-  ['frequency', 'Frequency', ['Morning', 'Afternoon', 'Evening', 'Night']],
-  ['duration', 'Duration (days)', 'number'],
-  ['time', 'Time', 'time'],
-];
+const allocationSelectClass = 'w-full min-w-0 rounded-md border border-white/20 bg-[#0d0e0d] px-3 py-2 text-xs text-text-highlight focus:outline-2 focus:outline-text-highlight';
+const dosageOptions = ['10 mg', '100 mg', '250 mg', '500 mg', '650 mg', '1000 mg'];
+const timeOptions = Array.from({ length: 48 }, (_, index) => String(Math.floor(index / 2)).padStart(2, '0') + ':' + (index % 2 ? '30' : '00'));
+const initialAllocation = { medicineId: 'amoxicillin', dosage: '500 mg', quantity: '20', frequency: 'Morning', duration: '15', time: '08:00', labTest: 'Blood test' };
 
 function validAllocationState(value) {
   const textFields = ['id', 'doctorId', 'doctorName', 'patientId', 'patientName', 'department', 'medicineId', 'medicineName', 'dosage', 'frequency', 'time', 'labTest', 'createdAt'];
@@ -265,9 +246,11 @@ function MedicineAllocation({ id }) {
   const location = useLocation();
   const doctor = useDoctors().find((record) => record.id === id);
   const [saved, setSaved] = useState(readAllocations);
-  const [patientId, setPatientId] = useState('');
-  const [query, setQuery] = useState('');
-  const [values, setValues] = useState(emptyAllocation);
+  const [patientId, setPatientId] = useState('SAH257384');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const query = searchParams.get('q') || '';
+  const setQuery = (text) => setSearchParams((current) => { const next = new URLSearchParams(current); if (text) next.set('q', text); else next.delete('q'); return next; }, { replace: true, state: location.state });
+  const [values, setValues] = useState(initialAllocation);
   const [errors, setErrors] = useState({});
   const [notice, setNotice] = useState('');
   const [saveError, setSaveError] = useState('');
@@ -277,6 +260,7 @@ function MedicineAllocation({ id }) {
   const [catalogStock, setCatalogStock] = useState('');
   const [catalogError, setCatalogError] = useState('');
   const [showPatientDetails, setShowPatientDetails] = useState(false);
+  const [showSummary, setShowSummary] = useState(false);
   const headingRef = useRef(null);
   const formRef = useRef(null);
   useEffect(() => {
@@ -288,11 +272,11 @@ function MedicineAllocation({ id }) {
     return () => { window.removeEventListener('storage', refresh); window.removeEventListener('focus', onFocus); };
   }, []);
   const returnTo = location.state?.returnTo?.match(/^\/doctor-nurse\/doctor(?:\?|$)/) ? location.state.returnTo : '/doctor-nurse/doctor';
-  const patient = allocationPatients.find((record) => record.id === patientId);
   const matchingPatients = allocationPatients.filter((record) => (record.name + ' ' + record.id).toLowerCase().includes(query.trim().toLowerCase()));
+  const patient = query.trim() ? (matchingPatients.length === 1 ? matchingPatients[0] : matchingPatients.find((record) => record.id === patientId)) : allocationPatients.find((record) => record.id === patientId);
   const medicine = saved.data.medicines.find((record) => record.id === values.medicineId);
   const remainingStock = availableStock(saved.data, values.medicineId);
-  const history = saved.data.records.filter((record) => record.doctorId === id && (!patientId || record.patientId === patientId)
+  const history = [...saved.data.records.filter((record) => record.doctorId === id), ...sampleAllocationHistory].filter((record) => (!patient || record.patientId === patient.id)
     && (record.patientName + ' ' + record.patientId).toLowerCase().includes(query.trim().toLowerCase())).slice().sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   const currentPage = Math.min(page, Math.max(1, Math.ceil(history.length / 5)));
 
@@ -304,6 +288,7 @@ function MedicineAllocation({ id }) {
   }
 
   function selectPatient(value) {
+    setShowSummary(Boolean(value));
     setPatientId(value);
     setValues(emptyAllocation);
     setErrors({});
@@ -322,7 +307,7 @@ function MedicineAllocation({ id }) {
     const nextErrors = {};
     if (!patient) nextErrors.patientId = 'Select a patient before allocating medicine.';
     if (!latest.data.medicines.some((item) => item.id === values.medicineId)) nextErrors.medicineId = 'Select a medicine.';
-    if (!values.dosage.trim()) nextErrors.dosage = 'Enter a dosage.';
+    if (!dosageOptions.includes(values.dosage)) nextErrors.dosage = 'Select a dosage.';
     const quantity = Number(values.quantity);
     const duration = Number(values.duration);
     if (!Number.isSafeInteger(quantity) || quantity < 1) nextErrors.quantity = 'Enter a whole quantity of at least 1.';
@@ -383,77 +368,96 @@ function MedicineAllocation({ id }) {
     setDialog('');
   }
 
+  function searchPatients(text = query) {
+    setQuery(text);
+    const matches = allocationPatients.filter((record) => (record.name + ' ' + record.id).toLowerCase().includes(text.trim().toLowerCase()));
+    const nextId = text.trim() && matches.length === 1 ? matches[0].id : '';
+    if (nextId !== patientId) selectPatient(nextId);
+    setShowSummary(Boolean(nextId));
+    setPage(1);
+  }
+
   const historyColumns = [
-    { key: 'patientName', label: 'Patient name' }, { key: 'patientId', label: 'Patient ID' },
+    { key: 'patientName', label: 'Patient Name' }, { key: 'patientId', label: 'Patient ID' },
     { key: 'department', label: 'Department' }, { key: 'doctorName', label: 'Doctor', render: (value) => 'Dr. ' + value },
-    { key: 'createdAt', label: 'Date', render: (value) => new Date(value).toLocaleDateString('en-GB') },
+    { key: 'createdAt', label: 'Date', render: (value) => new Date(value).toLocaleDateString('en-GB').replaceAll('/', '-') },
     { key: 'medicineName', label: 'Medicine' }, { key: 'dosage', label: 'Dosage' },
-    { key: 'duration', label: 'Duration', render: (value) => value + ' days' }, { key: 'quantity', label: 'Quantity' },
-    { key: 'frequency', label: 'Frequency' }, { key: 'time', label: 'Time' }, { key: 'labTest', label: 'Lab test', render: (value) => value || 'None' },
+    { key: 'duration', label: 'Duration', render: (value) => value + (value === 1 ? ' day' : ' days') },
+  ];
+  const allocationFields = [
+    ['dosage', 'Dosage', dosageOptions.map((value) => [value, value])],
+    ['quantity', 'Quantity', Array.from({ length: Math.min(remainingStock, 1000) }, (_, index) => [String(index + 1), String(index + 1)])],
+    ['frequency', 'Frequency', ['Morning', 'Afternoon', 'Evening', 'Night'].map((value) => [value, value])],
+    ['duration', 'Duration', Array.from({ length: 365 }, (_, index) => [String(index + 1), (index + 1) + (index ? ' days' : ' day')])],
+    ['time', 'Time', timeOptions.map((value) => [value, formatTime(value)])],
   ];
 
   return (
     <section className="mx-auto w-full min-w-0 max-w-[1400px] text-white" aria-labelledby="allocation-title">
-      <Button as={Link} to={doctor ? '/doctor-nurse/doctor/' + id : returnTo} state={{ returnTo }} className="mb-5 bg-btn-solid px-4 py-2 text-sm"><Icon icon="solar:arrow-left-linear" width="18" />{doctor ? 'Back to Doctor Profile' : 'Back to Doctors'}</Button>
-      <h1 ref={headingRef} tabIndex={-1} id="allocation-title" className="text-xl font-medium outline-none">{doctor ? 'Medicine Allocation' : 'Doctor not found'}</h1>
+      <div className="mb-8 flex flex-wrap items-center justify-between gap-3">
+        <h1 ref={headingRef} tabIndex={-1} id="allocation-title" className="text-base font-normal outline-none">{doctor ? 'Medicine Allocation' : 'Doctor not found'}</h1>
+        <Button as={Link} to={doctor ? '/doctor-nurse/doctor/' + id : returnTo} state={{ returnTo }} className="text-xs text-text-highlight"><Icon icon="solar:arrow-left-linear" width="16" />{doctor ? 'Back to Doctor Profile' : 'Back to Doctors'}</Button>
+      </div>
       {!doctor ? <p className="mt-4 text-white/60">Choose an existing doctor from the list.</p> : <>
-        <p className="mt-2 text-sm text-white/55">Dr. {doctor.name} · Demo only — fictional patients and medicine stock.</p>
-        {doctor.status !== 'Active' && <p role="status" className="mt-4 text-amber-300">This doctor is {doctor.status.toLowerCase()}. Allocation is unavailable; history remains visible.</p>}
-        {(saved.error || saveError) && <p role="alert" className="mt-4 rounded-lg border border-red-300/30 p-3 text-sm text-red-300">{saved.error || saveError}</p>}
-        <div className="my-7 grid items-end gap-4 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)]">
-          <Search aria-label="Search patient name or ID" placeholder="Search patient name or ID" value={query} onChange={(event) => { setQuery(event.target.value); setPage(1); }} />
-          <Select label="Patient name" value={patientId} onChange={(event) => selectPatient(event.target.value)} error={errors.patientId} className={allocationSelectClass}>
+        {doctor.status !== 'Active' && <p role="status" className="mb-4 text-sm text-amber-300">This doctor is {doctor.status.toLowerCase()}. Allocation is unavailable; history remains visible.</p>}
+        {(saved.error || saveError) && <p role="alert" className="mb-4 rounded-lg border border-red-300/30 p-3 text-sm text-red-300">{saved.error || saveError}</p>}
+        <div className="mb-7 grid items-end gap-4 md:ml-auto md:w-[85%] md:grid-cols-[minmax(0,2.5fr)_minmax(0,1fr)_minmax(0,1fr)]">
+          <Search aria-label="Search patient name or ID" placeholder="Search patient name or ID" value={query} onChange={(event) => searchPatients(event.target.value)} onSearch={() => searchPatients()} className="!rounded-none !border-0 !bg-[#0d281a] !py-1.5" />
+          <Select label="Patient name" value={patient?.id || ''} onChange={(event) => selectPatient(event.target.value)} error={errors.patientId} className={allocationSelectClass}>
             <option value="">Select patient</option>
             {matchingPatients.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
-            {patient && !matchingPatients.some((item) => item.id === patient.id) && <option value={patient.id}>{patient.name} (selected)</option>}
           </Select>
-          <Select label="Patient ID" value={patientId} onChange={(event) => selectPatient(event.target.value)} className={allocationSelectClass}>
-            <option value="">All patients</option>
+          <Select label="Patient ID" value={patient?.id || ''} onChange={(event) => selectPatient(event.target.value)} className={allocationSelectClass}>
+            <option value="">All</option>
             {matchingPatients.map((item) => <option key={item.id} value={item.id}>{item.id}</option>)}
-            {patient && !matchingPatients.some((item) => item.id === patient.id) && <option value={patient.id}>{patient.id} (selected)</option>}
           </Select>
         </div>
-        {query && <div className="mb-5 flex flex-wrap items-center gap-4 text-sm text-white/55"><span role="status">{matchingPatients.length} matching patients</span><Button onClick={() => { setQuery(''); setPage(1); }} className="text-text-highlight underline">Clear search</Button></div>}
-        {patient && <Card className="mb-7 !border-white/10 !bg-transparent !py-5">
-          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)_minmax(0,1fr)]">
-            <div className="min-w-0"><Icon icon="solar:user-circle-bold" width="64" className="mb-3 text-text-accent" /><h2 className="text-base text-text-highlight">{patient.name}</h2><p className="mt-2 text-xs text-white/60">ID: {patient.id}</p>{patient.email && <p className="mt-2 break-words text-xs">{patient.email}</p>}</div>
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">{[['Gender', patient.gender], ['Age', patient.age], ['Blood group', patient.bloodGroup], ['Department', patient.department], ['Bed number', patient.bed], ['Consultation type', patient.consultation]].map(([label, value]) => <div key={label}><p className="text-xs text-text-accent">{label}</p><p className="mt-2 break-words text-sm">{value || 'Not specified'}</p></div>)}</div>
-            <div className="grid grid-cols-2 gap-4 lg:border-l lg:border-text-accent/40 lg:pl-5">{[['Blood pressure', patient.pressure], ['Temperature', patient.temperature], ['Heart rate', patient.heartRate]].map(([label, value]) => <div key={label}><p className="text-xs text-white/60">{label}</p><p className="mt-2 text-sm text-text-highlight">{value || 'Not recorded'}</p></div>)}</div>
+        {query && !matchingPatients.length && <p role="status" className="mb-5 text-sm text-white/60">No patients found. Try another name or ID.</p>}
+        {(showSummary || query.trim()) && patient && <section aria-label="Patient summary" className="mb-8 grid gap-6 py-4 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)_minmax(0,1.4fr)]">
+          <div className="min-w-0 text-center">
+            <div className="mx-auto mb-3 flex size-16 items-center justify-center rounded-full border-2 border-text-highlight bg-[#c9f0da] text-[#76ae93] shadow-[0_0_24px_#0eff7b55]"><Icon icon="solar:user-rounded-bold" width="48" /></div>
+            <h2 className="text-sm text-text-highlight">{patient.title}</h2><p className="mt-2 text-xs text-white/75">ID: {patient.id}</p><p className="mt-2 break-words text-xs text-white/75">{patient.email}</p>
           </div>
-          <Button aria-expanded={showPatientDetails} onClick={() => setShowPatientDetails((current) => !current)} className="mt-5 text-xs text-text-highlight">{showPatientDetails ? 'Hide information' : 'View more information'}<Icon icon="solar:arrow-right-linear" width="16" /></Button>
-          {showPatientDetails && <p className="mt-3 text-sm leading-relaxed text-white/60">This is a fictional patient record for the allocation demo. No additional medical records are available. Saved allocations for {patient.name} appear in the history below.</p>}
-        </Card>}
-        <Card className="!border-white/10 !bg-transparent !py-5">
-          <h2 className="mb-5 text-base">Medicine allocation</h2>
+          <div className="min-w-0 md:border-l md:border-text-accent/50 md:pl-6">
+            <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3">{[['Gender', patient.gender], ['Age', patient.age], ['Blood Group', patient.bloodGroup], ['Department', patient.department], ['Bed Number', patient.bed], ['Consultation type', patient.consultation]].map(([label, value]) => <div key={label}><p className="text-xs text-text-highlight">{label}</p><p className="mt-3 break-words text-xs text-white/75">{value || 'Not specified'}</p></div>)}</div>
+            <div className="mt-5 text-right"><Button aria-expanded={showPatientDetails} onClick={() => setShowPatientDetails((current) => !current)} className="bg-btn-solid px-2 py-1 text-[10px]">{showPatientDetails ? 'Hide information' : 'View more information'}<Icon icon="solar:arrow-right-linear" width="14" /></Button></div>
+            {showPatientDetails && <p className="mt-3 text-xs text-white/65">{patient.name} · {patient.consultation} · {patient.department}. {history.length} allocation records shown below.</p>}
+          </div>
+          <div className="grid grid-cols-2 content-start gap-x-4 gap-y-6 md:border-l md:border-text-accent/50 md:pl-6">{[['Blood pressure', patient.pressure, 'mmHg'], ['Temperature', patient.temperature, ''], ['Heart Rate', patient.heartRate, 'bpm']].map(([label, value, unit]) => <div key={label}><p className="text-sm text-white/75">{label}</p><p className="mt-1 text-base text-text-highlight">{value || '—'} {value && <span className="text-xs text-white/70">{unit}</span>}</p></div>)}</div>
+        </section>}
+        <Card className="!border-[#163421] !bg-[#0c100d] !px-5 !py-4 !shadow-[inset_0_0_18px_#00a04808]">
+          <h2 className="mb-5 text-sm">Medicine allocation</h2>
           <form ref={formRef} onSubmit={allocate} noValidate>
-            <div className="grid gap-5 md:grid-cols-3">
-              <Input label="Selected patient name" value={patient?.name || ''} readOnly placeholder="Select a patient above" />
-              <Input label="Selected patient ID" value={patient?.id || ''} readOnly />
-              <Input label="Department" value={patient?.department || ''} readOnly />
+            <div className="grid gap-x-8 gap-y-4 md:grid-cols-3 [&_label]:text-xs [&_input]:py-2 [&_input]:text-xs">
+              <Input label="Patient Name" value={patient?.name || ''} readOnly placeholder="Select a patient" className="!bg-[#0d0e0d] text-white/55" />
+              <Input label="Patient ID" value={patient?.id || ''} readOnly className="!bg-[#0d0e0d] text-white/55" />
+              <Input label="Department" value={patient?.department || ''} readOnly className="!bg-[#0d0e0d] text-white/55" />
               <div>
-                <div className="mb-2 flex items-center justify-between gap-2"><label htmlFor="allocation-medicine" className="text-sm text-white/75">Medicine name *</label><Button aria-label="Add medicine" onClick={() => openCatalog('medicine')} className="text-text-highlight"><Icon icon="solar:add-circle-linear" width="18" /></Button></div>
-                <Select id="allocation-medicine" required value={values.medicineId} error={errors.medicineId} onChange={(event) => change('medicineId', event.target.value)} className={allocationSelectClass}>
-                  <option value="">Select medicine</option>{saved.data.medicines.map((item) => <option key={item.id} value={item.id}>{item.name} ({availableStock(saved.data, item.id)} available)</option>)}
+                <div className="mb-2 flex items-center gap-1"><label htmlFor="allocation-medicine" className="text-xs text-white/75">Medicine name</label><Button aria-label="Add medicine" onClick={() => openCatalog('medicine')} className="text-text-highlight"><Icon icon="solar:add-circle-bold" width="16" /></Button></div>
+                <Select id="allocation-medicine" aria-required="true" value={values.medicineId} error={errors.medicineId} onChange={(event) => { change('medicineId', event.target.value); if (Number(values.quantity) > availableStock(saved.data, event.target.value)) change('quantity', ''); }} className={allocationSelectClass}>
+                  <option value="">Select medicine</option>{saved.data.medicines.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
                 </Select>
-                {medicine && <p role="status" className={'mt-2 text-xs ' + (remainingStock ? 'text-text-accent' : 'text-red-300')}>{remainingStock ? 'Available stock: ' + remainingStock : 'Out of stock'}</p>}
+                {medicine && <p role="status" className={remainingStock ? 'sr-only' : 'mt-2 text-xs text-red-300'}>{remainingStock ? 'Available stock: ' + remainingStock : 'Out of stock'}</p>}
               </div>
-              {allocationFields.map(([name, label, type]) => Array.isArray(type)
-                ? <Select key={name} label={label} required value={values[name]} error={errors[name]} onChange={(event) => change(name, event.target.value)} className={allocationSelectClass}><option value="">Select {label.toLowerCase()}</option>{type.map((option) => <option key={option}>{option}</option>)}</Select>
-                : <Input key={name} name={name} label={label} type={type} required value={values[name]} min={type === 'number' ? 1 : undefined} max={name === 'quantity' ? remainingStock : name === 'duration' ? 365 : undefined} step={type === 'number' ? 1 : undefined} maxLength={name === 'dosage' ? 40 : undefined} error={errors[name]} onChange={(event) => change(name, event.target.value)} className={type === 'time' ? '[color-scheme:dark]' : ''} />)}
+              {allocationFields.map(([name, label, options]) => <Select key={name} name={name} label={label} aria-required="true" value={values[name]} error={errors[name]} onChange={(event) => change(name, event.target.value)} className={allocationSelectClass}>
+                <option value="">Select {label.toLowerCase()}</option>
+                {options.map(([value, text]) => <option key={value} value={value}>{text}</option>)}
+                {values[name] && !options.some(([value]) => value === values[name]) && <option value={values[name]} disabled>{values[name]} (unavailable)</option>}
+              </Select>)}
               <div>
-                <div className="mb-2 flex items-center justify-between gap-2"><label htmlFor="allocation-lab" className="text-sm text-white/75">Lab test (optional)</label><Button aria-label="Add lab test" onClick={() => openCatalog('lab')} className="text-text-highlight"><Icon icon="solar:add-circle-linear" width="18" /></Button></div>
+                <div className="mb-2 flex items-center gap-1"><label htmlFor="allocation-lab" className="text-xs text-white/75">Lab test</label><Button aria-label="Add lab test" onClick={() => openCatalog('lab')} className="text-text-highlight"><Icon icon="solar:add-circle-bold" width="16" /></Button></div>
                 <Select id="allocation-lab" value={values.labTest} error={errors.labTest} onChange={(event) => change('labTest', event.target.value)} className={allocationSelectClass}><option value="">None</option>{saved.data.labTests.map((test) => <option key={test}>{test}</option>)}</Select>
               </div>
+              <div className="flex flex-wrap items-end justify-end gap-3 md:col-span-2"><Button onClick={() => { setValues(emptyAllocation); setErrors({}); setNotice(''); setSaveError(''); }} className="min-w-28 border border-white/20 px-5 py-2 text-xs">Clear</Button><Button type="submit" disabled={doctor.status !== 'Active' || !!saved.error} className="min-w-28 border border-text-accent/40 bg-gradient-to-r from-[#005c2a] to-[#008840] px-5 py-2 text-xs">Allocate medicine</Button></div>
             </div>
-            {notice && <p role="status" className="mt-5 rounded-lg border border-text-accent/40 bg-btn-solid/30 p-3 text-sm text-text-highlight">{notice}</p>}
-            <div className="mt-6 flex flex-wrap justify-end gap-3"><Button onClick={() => { setValues(emptyAllocation); setErrors({}); setNotice(''); setSaveError(''); }} className="border border-white/20 px-6 py-2 text-sm">Clear</Button><Button type="submit" disabled={doctor.status !== 'Active' || !!saved.error} className="bg-btn-solid px-6 py-2 text-sm">Allocate medicine</Button></div>
+            {notice && <p role="status" className="mt-4 text-sm text-text-highlight">{notice}</p>}
           </form>
         </Card>
-        <section className="mt-7 min-w-0" aria-labelledby="allocation-history-title">
-          <h2 id="allocation-history-title" className="mb-4 text-base">Medicine allocation history</h2>
-          <Table columns={historyColumns} data={history.slice((currentPage - 1) * 5, currentPage * 5)} selectable={false} showActions={false} showControls={false} caption="Medicine allocation history" emptyMessage={query || patientId ? 'No allocations match this patient selection or search.' : 'No medicines allocated by this doctor yet.'} />
-          <Pagination page={currentPage} pageSize={5} totalItems={history.length} itemLabel="allocations" onPageChange={setPage} />
-        </section>
+        <Card as="section" className="mt-3 min-w-0 !border-[#163421] !bg-[#0c100d] !px-5 !py-4" aria-labelledby="allocation-history-title">
+          <h2 id="allocation-history-title" className="mb-5 text-sm">Medicine allocation history</h2>
+          <Table compact sortable={false} columns={historyColumns} data={history.slice((currentPage - 1) * 5, currentPage * 5)} selectable={false} showActions={false} showControls={false} caption="Medicine allocation history, including local sample records" emptyMessage={query || patientId ? 'No allocations match this patient selection or search.' : 'No medicines allocated by this doctor yet.'} />
+          {history.length > 5 && <Pagination page={currentPage} pageSize={5} totalItems={history.length} itemLabel="allocations" onPageChange={setPage} />}
+        </Card>
         <Modal open={!!dialog} title={dialog === 'medicine' ? 'Add medicine' : 'Add lab test'} onClose={() => setDialog('')}>
           <form onSubmit={addCatalogItem} noValidate className="space-y-5">
             <Input label={dialog === 'medicine' ? 'Medicine name' : 'Lab test name'} value={catalogName} maxLength={80} required onChange={(event) => { setCatalogName(event.target.value); setCatalogError(''); }} />

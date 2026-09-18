@@ -7,6 +7,23 @@ import Search from '../../components/Search/Search';
 import Select from '../../components/Select/Select';
 import Pagination from '../../components/Pagination/Pagination';
 
+// Shared Figma options for the form and listing filters.
+// oxlint-disable-next-line react/only-export-components
+export const DOCTOR_DEPARTMENTS = ['Medical department', 'Surgical Department', 'Supportive & Diagnostic Departments', 'Administrative & Non-Medical Departments'];
+// oxlint-disable-next-line react/only-export-components
+export const DOCTOR_SPECIALISTS = ['Cardiology', 'Anesthesiology', 'Dermatology', 'Gastroenterology', 'Gynaecology', 'Pharmacy', 'Neurology', 'Orthopedic', 'Radiology', 'Urology'];
+
+function normalizeDoctor(record) {
+  const aliases = { 'Orthopaedic Surgery': 'Orthopedic', Orthopaedics: 'Orthopedic', Orthopedics: 'Orthopedic' };
+  const specialist = aliases[record.specialist] || record.specialist;
+  const surgical = ['Orthopedic', 'General Surgery', 'Gynaecology', 'Urology'];
+  const supportive = ['Anesthesiology', 'Pharmacy', 'Radiology'];
+  const department = DOCTOR_DEPARTMENTS.includes(record.department) ? record.department
+    : surgical.includes(specialist) ? DOCTOR_DEPARTMENTS[1]
+      : supportive.includes(specialist) ? DOCTOR_DEPARTMENTS[2] : DOCTOR_DEPARTMENTS[0];
+  return { ...record, specialist, department };
+}
+
 export default function Doctors() {
   const doctors = useDoctors();
   const [params, setParams] = useSearchParams();
@@ -23,8 +40,8 @@ export default function Doctors() {
       return next;
     }, { replace: true });
   };
-  const departments = [...new Set(doctors.map((doctor) => doctor.department))].sort();
-  const specialists = [...new Set(doctors.map((doctor) => doctor.specialist))].sort();
+  const departments = DOCTOR_DEPARTMENTS;
+  const specialists = [...new Set([...DOCTOR_SPECIALISTS, ...doctors.map((doctor) => doctor.specialist)])];
   const visibleDoctors = doctors.filter((doctor) => (
     (!department || doctor.department === department)
     && (!specialist || doctor.specialist === specialist)
@@ -51,11 +68,11 @@ export default function Doctors() {
 
       <div className="my-5 flex flex-wrap items-center gap-3">
         <Select aria-label="Filter by department" value={department} onChange={(event) => updateFilter('department', event.target.value)} className={selectClass}>
-          <option value="">All departments</option>
+          <option value="">Select Department</option>
           {departments.map((value) => <option key={value}>{value}</option>)}
         </Select>
         <Select aria-label="Filter by specialist" value={specialist} onChange={(event) => updateFilter('specialist', event.target.value)} className={selectClass}>
-          <option value="">All specialists</option>
+          <option value="">Select Specialist</option>
           {specialists.map((value) => <option key={value}>{value}</option>)}
         </Select>
         <Search aria-label="Search doctors by name, ID or email" placeholder="Search doctor name or ID" value={query} onChange={(event) => updateFilter('q', event.target.value)} className="w-full sm:ml-auto sm:w-64" />
@@ -98,7 +115,7 @@ function DoctorCard({ doctor, returnTo }) {
       <p className="mt-1 min-h-8 text-center text-xs text-white/65">{doctor.qualification}</p>
       <dl className="mt-5 space-y-3 text-xs">
         {[
-          ['Department', doctor.department],
+          ['Specialist', doctor.specialist],
           ['Join Date', formattedDate],
           ['Contact', doctor.phone],
           ['Email ID', doctor.email],
@@ -210,13 +227,13 @@ export function loadDoctors(storage = getStorage()) {
       if (Array.isArray(records) && records.every(isDoctor)
         && new Set(records.map(({ id }) => id)).size === records.length) {
         // Preserve saved edits while supplying new demo fields for older seeded records.
-        return records.map((record) => ({ ...sampleDoctors.find((sample) => sample.id === record.id), ...record }));
+        return records.map((record) => normalizeDoctor({ ...sampleDoctors.find((sample) => sample.id === record.id), ...record }));
       }
     }
   } catch {
     // Browsers may block storage; the sample listing remains available.
   }
-  return sampleDoctors.map((doctor) => ({ ...doctor }));
+  return sampleDoctors.map(normalizeDoctor);
 }
 
 // Shared with Add/Edit; kept here to use the existing file structure.
