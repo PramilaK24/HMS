@@ -63,6 +63,12 @@ const Header = ({
   const handleSearch = (event) => {
     if (typeof onSearch === 'function') {
       onSearch(event.target.value);
+    } else if (location.pathname.startsWith('/doctor-nurse/doctor')) {
+      const params = new URLSearchParams(location.search);
+      if (event.target.value) params.set('q', event.target.value); else params.delete('q');
+      params.delete('page');
+      const target = location.pathname.endsWith('/medicine-allocation') ? location.pathname : '/doctor-nurse/doctor';
+      navigate({ pathname: target, search: params.toString() }, { replace: true, state: location.state });
     }
   };
 
@@ -78,8 +84,8 @@ const Header = ({
   };
 
   return (
-    <header className="flex items-center justify-between gap-4 border-b border-[#0EFF7B1F] bg-[#071611]/90 px-4 py-3 backdrop-blur-sm md:px-6">
-      <div className="min-w-0 flex-1">
+    <header className="flex flex-wrap items-center justify-between gap-3 border-b border-[#0EFF7B1F] bg-[#071611]/90 px-4 py-3 backdrop-blur-sm md:px-6">
+      <div className="min-w-0 basis-full lg:flex-1 lg:basis-auto">
         {headerConfig.breadcrumbs.length > 1 ? (
           <nav className="flex flex-wrap items-center gap-1 text-sm text-white/70" aria-label="Breadcrumb navigation">
             {headerConfig.breadcrumbs.map((crumb, index) => {
@@ -98,13 +104,14 @@ const Header = ({
         )}
       </div>
 
-      <div className="flex items-center gap-2 md:gap-3">
+      <div className="grid min-w-0 w-full grid-cols-[minmax(0,1fr)_auto_auto_auto] items-center gap-1 sm:gap-2 lg:w-auto">
         <TextField
-          className="min-w-[180px] max-w-[260px]"
+          className="!min-w-0 w-full lg:w-[220px]"
           variant="outlined"
           size="small"
           placeholder={headerConfig.searchPlaceholder}
           onChange={handleSearch}
+          value={location.pathname.startsWith('/doctor-nurse/doctor') ? new URLSearchParams(location.search).get('q') || '' : undefined}
           sx={{
             '& .MuiOutlinedInput-root': {
               backgroundColor: 'rgba(11, 18, 15, 0.9)',
@@ -129,13 +136,13 @@ const Header = ({
               color: 'rgba(255,255,255,0.7)',
             },
           }}
-          InputProps={{
+          slotProps={{ input: {
             startAdornment: (
               <InputAdornment position="start">
                 <Icon icon="material-symbols:search-rounded" width={18} height={18} />
               </InputAdornment>
             ),
-          }}
+          } }}
         />
 
         {headerConfig.actions.map((action) => (

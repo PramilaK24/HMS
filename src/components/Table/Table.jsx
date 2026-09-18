@@ -10,6 +10,8 @@ const Table = ({
   showControls = true,
   caption,
   emptyMessage = "No data found",
+  compact = false,
+  sortable = true,
   searchable = true,
   searchPlaceholder = "Search...",
   showFilterButton = true,
@@ -200,11 +202,11 @@ const Table = ({
       </div>}
 
       {/* Table */}
-      <div className="w-full overflow-x-auto rounded-xl border border-[#3C3C3C]">
-        <table className="w-full min-w-225">
+      <div className={`w-full overflow-x-auto ${compact ? '' : 'rounded-xl border border-[#3C3C3C]'}`}>
+        <table className={`w-full ${compact ? 'min-w-[720px]' : 'min-w-225'}`}>
           {caption && <caption className="sr-only">{caption}</caption>}
           <thead>
-            <tr className="border-b border-[#3C3C3C] bg-bg-dark">
+            <tr className={compact ? 'bg-[#062016]' : 'border-b border-[#3C3C3C] bg-bg-dark'}>
               {selectable && (
                 <th className="px-4 py-4 text-left">
                   <input
@@ -222,9 +224,9 @@ const Table = ({
               {columns.map((column) => (
                 <th
                   key={column.key}
-                  className="px-4 py-4 text-left text-sm font-medium text-gray-300 whitespace-nowrap"
+                  className={compact ? 'whitespace-nowrap px-3 py-2.5 text-left text-xs font-normal text-[#00ff84]' : 'px-4 py-4 text-left text-sm font-medium text-gray-300 whitespace-nowrap'}
                 >
-                  <button
+                  {sortable ? <button
                     type="button"
                     onClick={() => handleSort(column.key)}
                     className="flex items-center gap-2"
@@ -235,7 +237,7 @@ const Table = ({
                       icon={getSortIcon(column.key)}
                       width="16"
                     />
-                  </button>
+                  </button> : column.label}
                 </th>
               ))}
 
@@ -253,7 +255,7 @@ const Table = ({
                 <tr
                   key={row.id}
                   onClick={() => onRowClick?.(row)}
-                  className="border-b border-[#3C3C3C] hover:bg-white/5 cursor-pointer"
+                  className={`border-b ${compact ? 'border-white/10' : 'border-[#3C3C3C]'} hover:bg-white/5 ${onRowClick ? 'cursor-pointer' : ''}`}
                 >
                   {selectable && (
                     <td className="px-4 py-4">
@@ -272,7 +274,7 @@ const Table = ({
                   {columns.map((column) => (
                     <td
                       key={column.key}
-                      className="px-4 py-4 text-sm text-gray-300 whitespace-nowrap"
+                      className={compact ? 'whitespace-nowrap px-3 py-3 text-xs text-white/80' : 'px-4 py-4 text-sm text-gray-300 whitespace-nowrap'}
                     >
                       {column.type === "status"
                         ? renderStatus(row[column.key])

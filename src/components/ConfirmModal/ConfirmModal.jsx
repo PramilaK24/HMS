@@ -1,6 +1,8 @@
 import React from 'react';
 import { Icon } from '@iconify/react';
 
+const gradientButtonStyle = "flex items-center justify-center gap-2 rounded-[12px] border-b border-[#0EFF7B] bg-gradient-to-r from-[#025126] via-[#0D7F41] to-[#025126] px-6 py-[10px] text-[15px] font-semibold text-white shadow-[0_2px_12px_0_rgba(0,0,0,0.25)] transition hover:opacity-90";
+
 const ConfirmModal = ({ 
   isOpen, 
   onClose, 
@@ -33,7 +35,7 @@ const ConfirmModal = ({
         <div className="flex justify-center gap-4 w-full">
           <button 
             onClick={onClose} 
-            className="flex-1 py-2.5 rounded-md border border-gray-600 text-gray-300 text-sm font-medium hover:bg-gray-800 transition"
+            className="flex-1 py-[10px] rounded-[12px] border border-gray-600 text-gray-300 text-[15px] font-medium hover:bg-gray-800 transition"
           >
             {cancelText}
           </button>
@@ -42,7 +44,7 @@ const ConfirmModal = ({
               onConfirm();
               onClose();
             }} 
-            className="flex-1 py-2.5 rounded-md bg-btn-solid text-white text-sm font-medium hover:opacity-90 transition"
+            className={"flex-1 " + gradientButtonStyle}
           >
             {confirmText}
           </button>
